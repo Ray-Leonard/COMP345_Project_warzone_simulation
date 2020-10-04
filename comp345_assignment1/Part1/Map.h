@@ -51,5 +51,24 @@ public:
 
 };
 
+class Map
+{
+public:
+    string* mapName;
+    vector<Territory*> allNodes;
+    vector<Continent*> allContinents;
+    int** allRelation;
+
+    Map();
+    Map(string worldName);
+    string getMapName();
+    void addContinent(Continent* c);
+    void addNode(Territory* tt);
+    void printNodes();
+    void setAllRelation(int** allGraph);
+    void printMap();
+
+};
+
 
 #endif //DEMO11_MAP_H

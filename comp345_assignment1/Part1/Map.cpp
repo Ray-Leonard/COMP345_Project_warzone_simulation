@@ -83,3 +83,56 @@ void Continent::printRelation()
     }
     cout<<"-------------------"<<endl;
 }
+
+Map::Map()
+{
+    mapName = new string("");
+}
+Map::Map(string worldName)
+{
+    mapName = new string("");
+    *mapName = worldName;
+}
+string Map::getMapName() {return *mapName;}
+void Map::addContinent(Continent *c) {allContinents.push_back(c);}
+void Map::addNode(Territory *tt) {allNodes.push_back(tt);}
+void Map::printNodes()
+{
+    int size = allNodes.size();
+    for(int i=0;i<size;i++)
+    {
+        cout<<allNodes[i]->getOwnership()<<endl;
+    }
+}
+void Map::setAllRelation(int **allGraph)
+{
+    int size = allNodes.size();
+    allRelation = new int*[size];
+    for(int i=0;i<size;i++)
+    {
+        allRelation[i] = new int[size];
+    }
+    for(int i=0;i<size;i++)
+    {
+        for(int j=0;j<size;j++)
+        {
+            allRelation[i][j] = allGraph[i][j];
+        }
+    }
+}
+void Map::printMap()
+{
+    cout<<"\n-------------------"<<endl;
+    int size = allNodes.size();
+    for(int i=0;i<size;i++)
+    {
+        for(int j=0;j<size;j++)
+        {
+            cout<<allRelation[i][j]<<" ";
+        }
+        cout<<endl;
+    }
+    cout<<"-------------------"<<endl;
+}
+
+
