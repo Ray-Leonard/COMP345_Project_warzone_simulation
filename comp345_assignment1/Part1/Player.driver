@@ -34,8 +34,7 @@ int main() {
 	cout << "The player " << p1ayer1->getName() << " defends these territorties: ";
 	for (int i = 0; i < p1ayer1->toDefend().size(); i++) {
 		cout << p1ayer1->toDefend().at(i)->getOwnership() << "  ";
-	}
-	cout << "\n";
+	}cout << "\n";
 
 	//testing toAttack()
 	cout << "testing toAttack() method---------------------------------\n";
@@ -44,11 +43,15 @@ int main() {
 	cout << "The player " << p1ayer2->getName() << " attack these territorties: ";
 	for (int i = 0; i < p1ayer2->toAttack().size(); i++) {
 		cout << p1ayer2->toAttack().at(i)->getOwnership() << "  ";
-	}
+	}cout << "\n";
 	
 	cout << "testing issueOrder() method---------------------------------\n";
 	p1ayer1->issueOrder();
 	p1ayer1->issueOrder();
-	p1ayer1->printOrder();
+	cout <<*p1ayer1;
+
+	//delete player that created
+	delete p1ayer1;
+	delete p1ayer2;
 	
 }
