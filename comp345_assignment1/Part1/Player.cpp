@@ -15,6 +15,12 @@ Player::Player()
 	name = new string("");
 }
 
+//Destructor delete new name vireable which not using
+Player::~Player()
+{
+	delete name;
+	cout << "Player obj deleted\n";
+}
 //Parametric construtor set only name
 Player::Player(string pname)
 {
@@ -35,12 +41,10 @@ Player::Player( Player& p ,string pname)
 		this->orders.push_back(*it);
 	}
 
-}
+	for (vector<Card*>::iterator it = p.cards.begin(); it != p.cards.end(); ++it) {
+		this->cards.push_back(*it);
+	}
 
-//Destructor delete new name vireable which not using
-Player::~Player()
-{
-	delete name;
 }
 
 //ToAttack() method return a list of territories
@@ -85,8 +89,8 @@ Player& Player::operator=(const Player& p)
 ostream& operator<<(ostream& strm, Player& player)
 {
 	strm << "Player "<<*player.name<<" has " << player.territories.size() << " territories, "
-		//<< player.handOfCards.size() << " cards and "
-		<< player.orders.size() << " orders size.\n";
+		<< player.cards.size() << " cards and "
+		<< player.orders.size() << " orders.\n";
 	return strm;
 }
 
@@ -114,7 +118,7 @@ void Player::setTerr(vector<Territory*> p)
 void Player::printOrder()
 {
 	//print out and test if player has terr
-	cout << "\nThe player " << this->getName() << " issues these orders: ";
+	cout << "The player " << this->getName() << " issues these orders: ";
 	for (int i = 0; i < this->orders.size(); i++) {
 		cout << this->orders.at(i) << "  ";
 	}
