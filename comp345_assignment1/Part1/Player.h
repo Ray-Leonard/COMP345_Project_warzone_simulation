@@ -6,7 +6,7 @@
 #include <list>
 #include <vector>
 #include "Map.h"
-//#include "Cards.h"
+#include "Cards.h"
 #include "Orders.h"
 
 
@@ -18,6 +18,7 @@ public:
 	string* name;
 	vector<Territory*> territories;
 	vector<Order*> orders;
+	vector<Card*> cards;
 	
 	Player(); // default constructor
 	Player(string pname);
@@ -36,14 +37,4 @@ public:
 	friend ostream& operator <<(ostream &strm, Player &player);
 };
 
-//class Order
-//{
-//public:
-//	string* orderlines;
-//
-//	Order();
-//	Order(string o);
-//	string getOrder();
-//
-//};
 #endif DEMO11_PLAYER_H
