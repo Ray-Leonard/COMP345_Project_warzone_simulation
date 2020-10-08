@@ -1,0 +1,54 @@
+#include "Player.h"
+#include "Map.h"
+#include "Orders.h"
+#include <iostream>
+
+using namespace std;
+
+int main() {
+	//new territorties list
+	Territory* t1 = new Territory{ "Canada",4};
+	Territory* t2 = new Territory{ "American",5 };
+	Territory* t3 = new Territory{ "Cuba",3 };
+	Territory* t4 = new Territory{ "Maxico",3 };
+	Territory* t5 = new Territory{ "UK",3 };
+	
+	//test to see if player has territories list
+	//bulid a player use assignmaent constractor
+	cout << "testing player owns--------------------------\n";
+	vector<Territory*> tlst1 = {t1,t2};
+	Player* p1ayer1 = new Player("Wendy");
+	p1ayer1->setTerr(tlst1);	//set a territorie list to the player and print
+	cout << *p1ayer1;	//stream insetipn operator
+	
+	//bulid a player use Copy constractor
+	//set a territorie list to the player and print
+	vector<Territory*> tlst2 = { t4, t5 ,t3};
+	Player*  p1ayer2 = new Player (*p1ayer1,"Peter");
+	p1ayer2->setTerr(tlst2);
+	
+	//testing toDefend()
+	cout << "testing toDefend() method--------------------------------\n";
+	p1ayer1->toDefend();
+	//print out and test 
+	cout << "The player " << p1ayer1->getName() << " defends these territorties: ";
+	for (int i = 0; i < p1ayer1->toDefend().size(); i++) {
+		cout << p1ayer1->toDefend().at(i)->getOwnership() << "  ";
+	}
+	cout << "\n";
+
+	//testing toAttack()
+	cout << "testing toAttack() method---------------------------------\n";
+	p1ayer2->toAttack();
+	//print out and test
+	cout << "The player " << p1ayer2->getName() << " attack these territorties: ";
+	for (int i = 0; i < p1ayer2->toAttack().size(); i++) {
+		cout << p1ayer2->toAttack().at(i)->getOwnership() << "  ";
+	}
+	
+	cout << "testing issueOrder() method---------------------------------\n";
+	p1ayer1->issueOrder();
+	p1ayer1->issueOrder();
+	p1ayer1->printOrder();
+	
+}
