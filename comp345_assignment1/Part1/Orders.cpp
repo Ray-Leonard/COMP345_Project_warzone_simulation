@@ -17,7 +17,13 @@ Order::Order(const Order& toCopy) {
     wasExecuted = toCopy.wasExecuted;
 }
 
-Order::~Order() {}
+Order::~Order() 
+{ /*delete player;*/
+    /*for (unsigned int i = 0; i < player.size(); ++i) {
+        delete player.at(i);
+        player.at(i) = nullptr;
+    }*/
+}
 
 Order& Order::operator=(const Order& rightSide) {
     player = rightSide.player;
@@ -47,7 +53,11 @@ Deploy& Deploy::operator=(const Deploy& rightSide) {
     return *this;
 }
 
-Deploy::~Deploy() {}
+Deploy::~Deploy() {
+    delete territoryToDeploy;
+    
+    delete player;
+}
 
 bool Deploy::validate() 
 {
@@ -84,7 +94,11 @@ Advance::Advance(const Advance& toCopy) : Order(toCopy) {
     this->targetTerritory = toCopy.targetTerritory;
 }
 
-Advance::~Advance() {}
+Advance::~Advance() {
+    delete targetTerritory;
+    delete sourceTerritory;
+    delete player;
+}
 
 Advance& Advance::operator=(const Advance& rightSide) {
     Order::operator=(rightSide);
@@ -133,7 +147,11 @@ Bomb::Bomb(const Bomb& toCopy) : Order(toCopy) {
     this->targetTerritory = toCopy.targetTerritory;
 }
 
-Bomb::~Bomb() {}
+Bomb::~Bomb() {
+    delete targetTerritory;
+    delete sourceTerritory;
+    delete player;
+}
 
 Bomb& Bomb::operator=(const Bomb& rightSide) {
     Order::operator=(rightSide);
@@ -178,7 +196,10 @@ Blockade::Blockade(const Blockade& toCopy) : Order(toCopy) {
     this->territoryToBlockade = toCopy.territoryToBlockade;
 }
 
-Blockade::~Blockade() {}
+Blockade::~Blockade() {
+    delete territoryToBlockade;
+    delete player;
+}
 
 Blockade& Blockade::operator=(const Blockade& rightSide) {
     Order::operator=(rightSide);
@@ -222,7 +243,9 @@ Negotiate::Negotiate(const Negotiate& toCopy) : Order(toCopy) {
     this->opponent = toCopy.opponent;
 }
 
-Negotiate::~Negotiate() {}
+Negotiate::~Negotiate() {
+  
+}
 
 Negotiate& Negotiate::operator=(const Negotiate& rightSide) {
     Order::operator=(rightSide);
@@ -232,7 +255,8 @@ Negotiate& Negotiate::operator=(const Negotiate& rightSide) {
 
 bool Negotiate::validate() {
     // Check that the players negotiating aren't the same
-    return player != opponent;
+    cout << "Order is validated." << endl;
+    return true;
 }
 
 void Negotiate::execute() {
@@ -269,7 +293,15 @@ Airlift::Airlift(const Airlift& toCopy) : Order(toCopy) {
     this->targetTerritory = toCopy.targetTerritory;
 }
 
-Airlift::~Airlift() {}
+Airlift::~Airlift() {
+    delete targetTerritory;
+    delete sourceTerritory;
+   /* for (unsigned int i = 0; i < territories.size(); ++i) {
+        delete territories.at(i);
+        territories.at(i) = nullptr;
+    }*/
+    delete player;
+}
 
 Airlift& Airlift::operator=(const Airlift& rightSide) {
     Order::operator=(rightSide);
@@ -317,6 +349,7 @@ OrdersList::~OrdersList() {
     for (auto order : *ordersList) {
         delete order;
     }
+    
     ordersList->clear();
     delete ordersList;
     ordersList = nullptr;
@@ -361,4 +394,5 @@ void OrdersList::remove(int position) {
     // Remove 1 to account for position being 1-indexed
     ordersList->erase(ordersList->begin() + position - 1);
 }
+
 
