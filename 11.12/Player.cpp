@@ -145,7 +145,7 @@ void Player::issueOrder(Map* map)
 		}
 
 		// create order based on the user input, and add the order into player's order list
-		Order* deployOrder = new 
+		//Order* deployOrder = new 
 
 	}
 

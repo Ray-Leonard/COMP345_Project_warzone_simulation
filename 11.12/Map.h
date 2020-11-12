@@ -10,7 +10,7 @@
 #include <array>
 #include <map>
 #include <vector>
-#include "Player.h"
+//#include "Player.h"
 using namespace std;
 
 class Territory
@@ -40,7 +40,7 @@ public:
     ~Territory();
 
     //===========================================
-    std::vector<Territory*> neighbors;
+    /*std::vector<Territory*> neighbors;
     void SetPlayer(Player* player);
     int GetarmyNum();
     void SetarmyNum(int armyNum);
@@ -49,7 +49,7 @@ public:
 
     void AddNeigbor(Territory* neighbor);
     const std::vector<Territory*>* const GetNeighbors() const;
-    bool TestAdjacencyTo(Territory* toTest);
+    bool TestAdjacencyTo(Territory* toTest);*/
     //============================================
 
     string gettName();

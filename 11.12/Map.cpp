@@ -47,39 +47,39 @@ Territory::~Territory() {
 
 //==================================================
 
-Player* Territory::GetPlayer() { return player; }
-void Territory::SetPlayer(Player* player) { this->player = player; }
-
-int Territory::GetarmyNum() { return armyNum; }
-void Territory::SetarmyNum(int armyNumToAdd) {
-    armyNum = std::max(0, armyNumToAdd);
-}
-
-void Territory::AddarmyNum(int armyNum) { this->armyNum += std::max(0, armyNum); }
-
-int Territory::RemovearmyNum(int armyNumToRemove) {
-    armyNumToRemove = std::max(0, armyNumToRemove);
-    if (armyNumToRemove > armyNum) {
-        int toReturn{ armyNum };
-        armyNum = 0;
-        return toReturn;
-    }
-    armyNum -= armyNumToRemove;
-    return armyNumToRemove;
-}
-
-void Territory::AddNeigbor(Territory* neighbor) {
-    neighbors.push_back(neighbor);
-}
-
-const std::vector<Territory*>* const Territory::GetNeighbors() const {
-    return &neighbors;
-}
-
-bool Territory::TestAdjacencyTo(Territory* toTest) {
-    return (std::find(neighbors.begin(), neighbors.end(), toTest) !=
-        neighbors.end());
-}
+//Player* Territory::GetPlayer() { return player; }
+//void Territory::SetPlayer(Player* player) { this->player = player; }
+//
+//int Territory::GetarmyNum() { return armyNum; }
+//void Territory::SetarmyNum(int armyNumToAdd) {
+//    armyNum = std::max(0, armyNumToAdd);
+//}
+//
+//void Territory::AddarmyNum(int armyNum) { this->armyNum += std::max(0, armyNum); }
+//
+//int Territory::RemovearmyNum(int armyNumToRemove) {
+//    armyNumToRemove = std::max(0, armyNumToRemove);
+//    if (armyNumToRemove > armyNum) {
+//        int toReturn{ armyNum };
+//        armyNum = 0;
+//        return toReturn;
+//    }
+//    armyNum -= armyNumToRemove;
+//    return armyNumToRemove;
+//}
+//
+//void Territory::AddNeigbor(Territory* neighbor) {
+//    neighbors.push_back(neighbor);
+//}
+//
+//const std::vector<Territory*>* const Territory::GetNeighbors() const {
+//    return &neighbors;
+//}
+//
+//bool Territory::TestAdjacencyTo(Territory* toTest) {
+//    return (std::find(neighbors.begin(), neighbors.end(), toTest) !=
+//        neighbors.end());
+//}
 
 //=====================================================
 

@@ -339,9 +339,13 @@ std::ostream& operator<<(std::ostream& out, const Airlift& toOutput) {
 // Orders List
 OrdersList::OrdersList() {  }
 
-OrdersList::OrdersList(const OrdersList& toCopy) {
+OrdersList::OrdersList( OrdersList& toCopy) {
     // TODO implement copy constructor correctly
-
+   /* for (unsigned int i = 0; i < toCopy.ordersList.size(); ++i)
+    {
+        OrdersList* newo = new OrdersList(toCopy.ordersList.at(i));
+        ordersList.push_back(newo);
+    }*/
 }
 
 OrdersList::~OrdersList() {

@@ -154,7 +154,7 @@ private:
 class OrdersList {
 public:
     OrdersList();
-    OrdersList(const OrdersList& toCopy);
+    OrdersList( OrdersList& toCopy);
     ~OrdersList();
     OrdersList& operator=(const OrdersList& rightSide);
 
@@ -173,5 +173,5 @@ public:
         const OrdersList& toOutput);
     int getListSize();
 
-    std::vector<Order*> ordersList;
+    vector<Order*> ordersList;
 };
