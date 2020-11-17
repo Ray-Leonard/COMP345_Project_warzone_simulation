@@ -24,13 +24,56 @@ Card::Card(const Card& src)
 	type = src.getType();
 }
 
-Order* Card::play()
+Order* Card::play(Player* player, vector<Territory*>& toAtk, vector<Territory*>& toDef, vector<Player*>& playerList)
 {
-	// 1. create special order
-	string order = "A card of type [" + toString() + "] has been played.";
-	// 2. remove from hand
-	// 3. put back to deck
-	// (the above is to be done by the game engine, for now, in the CardsDriver.cpp)
+	int randAtk = rand() % toAtk.size();
+	int randDef = rand() % toDef.size();
+	// create and return a bomb order
+	if (type == CardTypes::bomb)
+	{
+		return new Bomb(player, nullptr, toAtk.at(randAtk));
+	}
+	// create and return a blockade order
+	else if (type == CardTypes::blockade)
+	{
+		return new Blockade(player, toDef.at(randDef));
+	}
+	// create and return an airlift order
+	else if (type == CardTypes::airlift)
+	{
+		Territory* source = toDef.at(randDef);
+		Territory* target = toAtk.at(randAtk);
+		Player* targetPlayer = nullptr;
+		int targetPlayerID = target->getpId();
+		// findt he target player reference
+		for (unsigned int i = 0; i < playerList.size(); ++i)
+		{
+			if (playerList.at(i)->name == targetPlayerID)
+			{
+				targetPlayer = playerList.at(i);
+				break;
+			}
+		}
+		int armyToAirlift = rand() % (source->getArmyNum() + 1);
+
+		return new Airlift(player, armyToAirlift, targetPlayer, source, target);
+	}
+	// create and return a negotiate order
+	else if (type == CardTypes::diplomacy)
+	{
+		Player* targetPlayer = player;
+		// find the target player that is not the player himself
+		for (unsigned int i = 0; i < playerList.size(); ++i)
+		{
+			if (playerList.at(i) != player)
+			{
+				targetPlayer = playerList.at(i);
+				break;
+			}
+		}
+
+		return new Negotiate(player, targetPlayer, nullptr);
+	}
 	return nullptr;
 }
 
@@ -138,6 +181,7 @@ bool Hand::add(Card* card)
 		handOfCards.push_back(card);
 		return true;
 	}
+
 	return false;
 }
 
@@ -260,7 +304,7 @@ void Deck::initialize()
 	// fill the deck with #capacity many of cards, one kind at a time
 	for (int i = 0; i < capacity; ++i)
 	{
-		Card* c = new Card(static_cast<CardTypes>(i % 6));
+		Card* c = new Card(static_cast<CardTypes>(i % 4));
 		deckOfCards.push_back(c);
 	}
 }

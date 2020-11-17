@@ -59,6 +59,7 @@ void PhaseObserver::displayPhaseInfo(string phase, Player* p, Order* o, string m
 	else if (phase == "execute") {
 		cout << "Player " << (o->getPlayer())->name << ": Execute order phase." << endl;
 		o->PrintMsg();
+		cout << msg;
 		cout << endl << endl;
 	}
 	//system("cls"); //clear the console

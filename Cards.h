@@ -36,7 +36,7 @@ public:
 	/* play method that is called to play the card, which creates
 	   an order and adds it to the player's list of orders and then returns this card to the deck.
 	   For now the return type is string, but should be Order. */
-	Order* play();
+	Order* play(Player* player, vector<Territory*>& toAtk, vector<Territory*>& toDef, vector<Player*>& playerList);
 	// getter to get the type of the card
 	CardTypes getType() const;
 	// convert the type to string

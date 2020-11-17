@@ -13,6 +13,7 @@ GameEngine::GameEngine()
     numOfPlayers = 0;
     observerFlag = false;
     deck = new Deck();
+    deck->initialize();
     phaseObserver = nullptr;
     statisticObserver = nullptr;
 }
@@ -171,25 +172,38 @@ void GameEngine::setObserverSwitch()
 
 bool GameEngine::gameCheck()
 {
-    //loop for all players 
+    vector<int> loserName;
+    //loop for all players to identify any losers
     for (int i = 0; i < numOfPlayers; ++i)
     {
-
-        //player will remove from game if owns zero terr
         if (pl.at(i)->getTerrNumber() == 0)
         {
-            delete pl.at(i);
-            pl.at(i) = nullptr;
-            pl.erase(pl.begin() + i);
-            numOfPlayers--;
-            i--;
-            continue;
+            loserName.push_back(pl.at(i)->name);
         }
-        //the players owns all the territories in the map win
-        else if (pl.at(i)->getTerrNumber() == m->getNumOfTrritories() && numOfPlayers == 1)
+    }
+
+    // delete all losers
+    for (unsigned int i = 0; i < loserName.size(); ++i)
+    {
+        for (unsigned int j = 0; j < pl.size(); ++j)
         {
-            return true;
+            if (pl.at(j)->name == loserName.at(i))
+            {
+                delete pl.at(j);
+                pl.at(j) = nullptr;
+                pl.erase(pl.begin() + j);
+                numOfPlayers--;
+                break;
+            }
         }
+    }
+
+    //the players owns all the territories in the map win
+    //no one won the game the neutral plater own all terr
+    if (pl.at(0)->getTerrNumber() == m->getNumOfTrritories()
+        && pl.size() == 1)
+    {
+        return true;
     }
     return false;
 }
@@ -201,8 +215,11 @@ void GameEngine::issueOrdersPhase()
     {
         pl.at(i)->currentPhase = 3;
         while (pl.at(i)->issueOrder(m, deck, pl)) {}
+
+        // after this player is done issuing orders, reset toAdvanceTime
+        pl.at(i)->resetToAdvanceTime();
+
         //phase observer
-        //get orderLists
         notify("issueorder", pl.at(i), NULL, "");
     }
 }
@@ -229,14 +246,33 @@ void GameEngine::executeOrdersPhase()
         //output the order one player by one player
         //cout <<"B"<< pl.at(i)->name;
         Order* o = allOrders.top();
-        o->execute();
+        string msg = o->execute();
         allOrders.pop();
-        notify("execute", NULL, o, ""); //phase observer
+        notify("execute", NULL, o, msg); //phase observer
         delete o;
         o = nullptr;
         //std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
-  
+    
+    // when finish executing all orders, check if any player needs to draw cards
+    for (int i = 0; i < numOfPlayers; i++)
+    {
+        // check if conquer happend in this round 
+        if (pl.at(i)->conquer)
+        {
+            // draw a card from the deck
+            Card* c = deck->draw();
+            // if player cannot have more cards
+            if (!pl.at(i)->cards->add(c))
+            {
+                // put the card back into the deck
+                deck->putBack(c);
+            }
+            pl.at(i)->conquer = false;
+        }
+        // reset IfNegotiate to false
+        pl.at(i)->IfNegotiate = false;
+    }
 }
 
 
@@ -390,6 +426,7 @@ void GameEngine::mainGameLoop()
     {
         cout << "Player" << pl.at(i)->name << " owns the following territories: " << endl;
         pl.at(i)->printTerrOwn();
+        cout << *pl.at(i)->cards;
     }
     //then back to reinforcementPhase
     if (gameCheck())

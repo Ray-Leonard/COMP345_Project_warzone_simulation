@@ -81,12 +81,12 @@ bool Deploy::validate()
     return (Order::validate() && player->hasTerritory(targetTerritory->gettId()));
  }
 
-void Deploy::execute() {
+string Deploy::execute() {
     if (!validate()) {
         // when this order cannot be executed, the army deployed should be returned to the player
         // but this should not really be happening because player only deploy to its own territory returned by toDefend()
         player->armyPool += numberOfArmies;
-        return;
+        return "";
     }
     wasExecuted = true;
     // add army to the territory
@@ -94,6 +94,7 @@ void Deploy::execute() {
 
     // output a message to console indicating the effect of this order
     //cout << *this;
+    return "";
 }
 
 const int Deploy::getPriority() const
@@ -173,13 +174,32 @@ bool Advance::validate(){
         }
     }
 
-    return (Order::validate()&& OneOfAdjTerrl);
+    bool isTargetValid = false;
+    if (targetTerritory->getpId() == 0)
+    {
+        isTargetValid = true;
+    }
+    else if (targetPlayer == nullptr)
+    {
+        isTargetValid = false;
+    }
+    else
+    {
+        isTargetValid = targetPlayer->name == targetTerritory->getpId();
+    }
+
+    return (Order::validate() && OneOfAdjTerrl
+        && sourceTerritory->getArmyNum() != 0
+        && sourceTerritory->getpId() != 0
+        && numberOfArmies != 0
+        && sourceTerritory->getpId() == player->name
+        && isTargetValid);
 }
 
-void Advance::execute() {
+string Advance::execute() {
     if (!validate()) {
-        cout << *this;
-        return;
+        //cout << *this;
+        return "";
     }
     wasExecuted = true;
     if (sourceTerritory->getArmyNum() < numberOfArmies)
@@ -190,59 +210,112 @@ void Advance::execute() {
     sourceTerritory->setArmy(sourceTerritory->getArmyNum() - numberOfArmies);
     //cout << numberOfArmies<<" "<<sourceTerritory->getArmyNum() << endl;
 
-    if (targetTerritory->getpId() == sourceTerritory->getpId() || player->name == targetPlayer->name){
+    //added for phase observer
+    string advanceMsg = "";
+
+    if (targetTerritory->getpId() == sourceTerritory->getpId()) {
         //If the source and target territory both belong to the player
         //Move the armies to the terr
         targetTerritory->addArmy(numberOfArmies);
-   /*     cout << "The target and defend territory both belong to Player " << player->name << endl;
-        cout << *this;*/
-    }else{  
-            //If not, find the number of armies that terr has smaller amrypool
-            int numberOfRound;
-            if (numberOfArmies <= targetTerritory->getArmyNum()) {
-                numberOfRound = numberOfArmies;
-            }
-            else {
-                numberOfRound = targetTerritory->getArmyNum();
-            }
-            //loop numberOfRound tims to start the fight
-            for (int i = 0; i < numberOfRound; i++) {
-                //Each attacking army unit involved has 60 % chances of killing one defending army.At the same time,
-                //each defending army unit has 70 % chances of killing one attacking army unit.
-                int attacker = rand() % 10;
-                int defender = rand() % 10;
-                if (attacker < 6) {
-                    //attacker will kill a defender and this round end 
-                    targetTerritory->setArmy(targetTerritory->getArmyNum()-1);
-            /*        cout << " attacker from ["<< sourceTerritory->gettName()
-                        <<"] kill a defender in ["<< targetTerritory->gettName()<<"]"<<endl;*/
-                }
-                if (defender < 7) {
-                    //defender will kill a attacker
-                    numberOfArmies -= 1;
-                   /* cout << " defender in [" << targetTerritory->gettName()
-                        << "] kill a attacker from [" << sourceTerritory->gettName() << "]" << endl;*/
-                }
-            }
-            //ending the fights and check the result
-            // conqure happens
-            if (targetTerritory->getArmyNum() == 0 && numberOfArmies != 0) {
-                targetTerritory->setpId(player->name);
-                player->addTerr(targetTerritory);
-                targetPlayer->removeTerrByTID(targetTerritory->gettId());
-                targetTerritory->addArmy(numberOfArmies);
-                player->conquer = true;//player win the war and conquered a terr
-                cout << " attacker from [" << player->name 
-                    << "] win and conquered [" << targetTerritory->gettName() << "]" << " of Player " << targetPlayer->name << endl;
-            }
-            else
-            {
-                // send the survivors back to source territory
-                sourceTerritory->addArmy(numberOfArmies);
-            }
-            //cout << *this;//print a message to show detailes 
 
+        //comment
+        //cout << "The target and defend territory both belong to Player" << player->name << endl;
+        //cout << *this;
+
+        //added
+        advanceMsg = "The target and defend territory both belong to Player " + to_string(player->name) + "\n";
     }
+    else {
+        // check if the two involved players are in negotiate
+        if (targetTerritory->getpId() != 0 && player->IfNegotiate && targetPlayer->IfNegotiate)
+        {
+            // if true, this order would stop executing 
+            sourceTerritory->addArmy(numberOfArmies);
+
+            advanceMsg = "Player " + to_string(player->name) + " and Player" + to_string(targetPlayer->name)
+                + " are in negotiate. No fight is initiated.\n";
+            /*cout << "Player" << player->name << " and Player" << targetPlayer->name
+                << " are in negotiate. No fight is initiated." << endl;*/
+            //notify("execute", NULL, this, advanceMsg); //phase observer
+            return advanceMsg;
+        }
+
+        if (targetTerritory->getpId() == 0) {
+            //cout << "The target Player is Neutral player" << endl;
+            advanceMsg = "The target Player is Neutral player";
+        }
+
+        //start the war: find the number of armies that terr has smaller amrypool
+        int numberOfRound;
+        if (numberOfArmies <= targetTerritory->getArmyNum()) {
+            numberOfRound = numberOfArmies;
+        }
+        else {
+            numberOfRound = targetTerritory->getArmyNum();
+        }
+        //loop numberOfRound tims to start the fight
+        for (int i = 0; i < numberOfRound; i++) {
+            //Each attacking army unit involved has 60 % chances of killing one defending army.At the same time,
+            //each defending army unit has 70 % chances of killing one attacking army unit.
+            int attacker = rand() % 10;
+            int defender = rand() % 10;
+            if (attacker < 6) {
+                //attacker will kill a defender and this round end 
+                targetTerritory->setArmy(targetTerritory->getArmyNum()-1);
+                /*cout << " Attacker from Player [" << sourceTerritory->getpId() <<
+                    "] [" << sourceTerritory->gettName()
+                    << "] kill a defender in Player [" << targetTerritory->getpId() <<
+                    "[" << targetTerritory->gettName() << "]" << endl;*/
+
+                advanceMsg += "Attacker from Player [" + to_string(sourceTerritory->getpId()) +"] [" 
+                    + sourceTerritory->gettName() + "] kill a defender in Player [" + to_string(targetTerritory->getpId()) 
+                    +"] [" + targetTerritory->gettName() + "]\n";
+            }
+            if (defender < 7) {
+                //defender will kill a attacker
+                numberOfArmies -= 1;
+                //cout << " Defender from Player [" << targetTerritory->getpId() <<
+                //    "] [" << targetTerritory->gettName()
+                //    << "] kill an attacker in Player [" << sourceTerritory->getpId() <<
+                //    "[" << sourceTerritory->gettName() << "]" << endl;
+
+                advanceMsg += "Defender from Player [" + to_string(targetTerritory->getpId()) + "] [" 
+                    + targetTerritory->gettName() + "] kill an attacker in Player [" + to_string(sourceTerritory->getpId())
+                    + "] [" + sourceTerritory->gettName() + "]\n";
+            }
+        }
+        //ending the fights and check the result
+        // conqure happens
+        if (targetTerritory->getArmyNum() == 0 && numberOfArmies != 0) {
+            // only remove territory from actual player, not netural player
+            if (targetTerritory->getpId() != 0) {
+                targetPlayer->removeTerrByTID(targetTerritory->gettId());
+            }
+            targetTerritory->setpId(player->name);
+            player->addTerr(targetTerritory);
+            targetTerritory->addArmy(numberOfArmies);
+            player->conquer = true;//player win the war and conquered a terr
+            //cout << " Attacker from Player [" << sourceTerritory->getpId() <<
+            //    "] [" << sourceTerritory->gettName()
+            //    << "] won and conquered Player [" << targetTerritory->getpId() <<
+            //    "] [" << targetTerritory->gettName() << "]" << endl;
+            
+            advanceMsg += "Attacker from Player [" + to_string(sourceTerritory->getpId()) + "] [" 
+                + sourceTerritory->gettName() + "] won and conquered Player [" + to_string(targetTerritory->getpId())
+                + "] [" + targetTerritory->gettName() + "]\n";
+        }
+        else
+        {
+            // send the survivors back to source territory
+            sourceTerritory->addArmy(numberOfArmies);
+            //cout << "conquer was not successful," << numberOfArmies <<
+            //    " survivor went back to [" << sourceTerritory->gettName() << endl;
+            advanceMsg += "conquer was not successful," + to_string(numberOfArmies)
+                + " survivor went back to [" + sourceTerritory->gettName() + "]\n";
+        }
+        //cout << *this;//print a message to show detailes 
+    }
+    return advanceMsg;
 }
 
 const int Advance::getPriority() const
@@ -269,8 +342,8 @@ std::ostream& operator<<(std::ostream& out, const Advance& toOutput) {
             out << "*Advance* Player[" << toOutput.player->name << "] has moved " << toOutput.numberOfArmies
                 << " army to player[" << toOutput.targetTerritory->getpId() << "] ["
                 << toOutput.targetTerritory->gettName() << "] . Army# ["
-                << toOutput.sourceTerritory->getArmyNum() << "] in ["
-                << toOutput.sourceTerritory->gettName() << "] " << endl;
+                << toOutput.targetTerritory->getArmyNum() << "] in ["
+                << toOutput.targetTerritory->gettName() << "] " << endl;
         }
         else
         {
@@ -306,15 +379,16 @@ bool Bomb::validate() {
     return (Order::validate() && !player->hasTerritory(targetTerritory->gettId()));
 }
 
-void Bomb::execute() {
+string Bomb::execute() {
     if (!validate()) {
         cout << *this;
-        return;
+        return "";
     }
     wasExecuted = true;
     //half of the armies are removed from targer territory. 
     targetTerritory->setArmy(targetTerritory->getArmyNum() / 2);
     //cout << *this;
+    return "";
 }
 
 void Bomb::PrintMsg() const {
@@ -352,25 +426,17 @@ const int Bomb::getPriority() const
 }
 
 //------------------------------------Blockade--------------------------------------------
-Blockade::Blockade() : Order() { //targetPlayer=nullptr; 
-}
+Blockade::Blockade() : Order() {}
 
 Blockade::Blockade(Player* player, Territory* targetTerritory)
-    : Order(player, targetTerritory) {
-    //this->targetPlayer = targetPlayer;
-}
+    : Order(player, targetTerritory) {}
 
-Blockade::Blockade(const Blockade& toCopy) : Order(toCopy) {
-    //this->targetPlayer = toCopy.targetPlayer;
-}
+Blockade::Blockade(const Blockade& toCopy) : Order(toCopy) {}
 
-Blockade::~Blockade() {
-    //delete targetPlayer;
-}
+Blockade::~Blockade() {}
 
 Blockade& Blockade::operator=(const Blockade& rightSide) {
     Order::operator=(rightSide);
-    //targetPlayer = rightSide.targetPlayer;
     return *this;
 }
 
@@ -380,21 +446,27 @@ const int Blockade::getPriority() const
 }
 
 bool Blockade::validate() {
-    return (Order::validate() && player->hasTerritory(targetTerritory->gettId()));;
+    //only terr player own can use blockade
+    return (Order::validate() && player->hasTerritory(targetTerritory->gettId()));
 }
-void Blockade::execute() {
+string Blockade::execute() {
     if (!validate()) {
-        cout <<*this;
-        return;
+        cout << *this;
+        return "";
     }
     wasExecuted = true;
     //double the armies in the target terr
     targetTerritory->setArmy(targetTerritory->getArmyNum() * 2);
     //rome this terr from player's own terr list
+    //TODO:the player's toAtk list will add this target terr
     player->removeTerrByTID(targetTerritory->gettId());
     // ownership of the territory is transferred to the Neutral player
+    //player->addToAttack(targetTerritory->gettId());
     targetTerritory->setpId(0);
-    cout << *this;
+
+    //cout << *this;
+
+    return "";
 }
 
 void Blockade::PrintMsg() const {
@@ -414,7 +486,8 @@ std::ostream& operator<<(std::ostream& out, const Blockade& toOutput) {
         {
             out << "*Blockade* [" << toOutput.player->name << "] has double armies in player ["
                 << toOutput.targetTerritory->getpId() << "] ["
-                << toOutput.targetTerritory->gettName() << "]"<< endl;
+                << toOutput.targetTerritory->gettName() << "] Number of armies in target territory changes to "
+                << toOutput.targetTerritory->getArmyNum() << endl;
         }
         else
         {
@@ -424,57 +497,62 @@ std::ostream& operator<<(std::ostream& out, const Blockade& toOutput) {
     return out;
 }
 
-/*
-Negotiate::Negotiate() : Order(), opponent() {}
+//-----------------------------------------Negotiate------------------------------------------------
+Negotiate::Negotiate() : Order(), targetPlayer(nullptr) { }
 
-Negotiate::Negotiate(Player* player, Player* opponent) : Order(player) {
-    this->opponent = opponent;
+Negotiate::Negotiate(Player* player, Player* targetPlayer, Territory* targetTerritory)
+    : Order(player, targetTerritory) {
+    this->targetPlayer = targetPlayer;
 }
 
 Negotiate::Negotiate(const Negotiate& toCopy) : Order(toCopy) {
-    this->opponent = toCopy.opponent;
+    targetPlayer = toCopy.targetPlayer;
 }
 
 Negotiate::~Negotiate() {
-  
+
 }
 
 Negotiate& Negotiate::operator=(const Negotiate& rightSide) {
     Order::operator=(rightSide);
-    opponent = rightSide.opponent;
+    targetPlayer = rightSide.targetPlayer;
     return *this;
+}
+
+const int Negotiate::getPriority() const
+{
+    return orderPriority;
 }
 
 bool Negotiate::validate() {
     // Check that the players negotiating aren't the same
-    cout << "Order is validated." << endl;
-    return true;
+    return (Order::validate() && player != targetPlayer);;
 }
 
-void Negotiate::execute() {
+string Negotiate::execute() {
     if (!validate()) {
-        return;
+        return "";
     }
     wasExecuted = true;
-    cout << "A peace deal was striken.\n";
-}
-
-std::ostream& Negotiate::doPrint(std::ostream& out) const {
-    out << "Negotiate order.";
-    if (wasExecuted) {
-        out << " This order was executed, its effect was [negotiate with other players].";
-    }
-    return out;
-}
-
-void Negotiate::PrintMsg() const {
-    cout << *this;
+    //the target player canot order advance and airlift order
+    targetPlayer->IfNegotiate = true;
+    player->IfNegotiate = true;
+    //cout << *this;
+    return "";
 }
 
 std::ostream& operator<<(std::ostream& out, const Negotiate& toOutput) {
-    return toOutput.doPrint(out);
+    if (toOutput.wasExecuted)
+    {
+        out << "*Negotiate* [" << toOutput.player->name << "] has block attack from player ["
+            << toOutput.targetPlayer->name << "] " << endl;
+    }
+    else
+    {
+        out << "*Negotiate* order of [" << toOutput.player->name << "] was not a valid order!" << endl;
+    }
+    return out;
 }
-*/
 
 //--------------------------------Airlift-----------------------------------------
 
@@ -504,30 +582,32 @@ Airlift& Airlift::operator=(const Airlift& rightSide) {
 }
 
 bool Airlift::validate() {
-    // Check if source and target territories are neighbors
-    //a list having all adjacent territories belong to the source territory
-    vector<int> adjTerr = sourceTerritory->getAdjacentTerritoryVec();
-    bool OneOfAdjTerrl = false;
-
-    for (unsigned int i = 0; i < adjTerr.size(); ++i)
+    bool isTargetValid = false;
+    if (targetTerritory->getpId() == 0)
     {
-        if (targetTerritory->gettId() == adjTerr.at(i))
-        {
-            OneOfAdjTerrl = false;
-        }
-        else {
-            OneOfAdjTerrl = true;
-            break;
-        }
+        isTargetValid = true;
+    }
+    else if (targetPlayer == nullptr)
+    {
+        isTargetValid = false;
+    }
+    else
+    {
+        isTargetValid = targetPlayer->name == targetTerritory->getpId();
     }
 
-    return (Order::validate() && OneOfAdjTerrl);
+    return (Order::validate()
+        && sourceTerritory->getArmyNum() != 0
+        && sourceTerritory->getpId() != 0
+        && numberOfArmies != 0
+        && sourceTerritory->getpId() == player->name
+        && isTargetValid);
 }
 
-void Airlift::execute() {
+string Airlift::execute() {
     if (!validate()) {
-        cout << *this;
-        return;
+        //cout << *this;
+        return "";
     }
     wasExecuted = true;
     if (sourceTerritory->getArmyNum() < numberOfArmies)
@@ -536,17 +616,40 @@ void Airlift::execute() {
     }
     //player will remove number of army from source terr
     sourceTerritory->setArmy(sourceTerritory->getArmyNum() - numberOfArmies);
-    //cout << numberOfArmies<<" "<<sourceTerritory->getArmyNum() << endl;
 
-    if (targetTerritory->getpId() == sourceTerritory->getpId() || player->name == targetPlayer->name) {
+    //added for phase observer
+    string airliftMsg = "";
+
+    if (targetTerritory->getpId() == sourceTerritory->getpId()) {
         //If the source and target territory both belong to the player
         //Move the armies to the terr
         targetTerritory->addArmy(numberOfArmies);
-        /*     cout << "The target and defend territory both belong to Player " << player->name << endl;
-             cout << *this;*/
+        //cout << "The target and defend territory both belong to Player" << player->name << endl;
+        //cout << *this;
+
+        //added
+        airliftMsg = "The target and defend territory both belong to Player " + to_string(player->name) + "\n";
     }
     else {
-        //If not, find the number of armies that terr has smaller amrypool
+
+        // check if the two involved players are in negotiate
+        if (targetTerritory->getpId() != 0 && player->IfNegotiate && targetPlayer->IfNegotiate)
+        {
+            // if true, this order would stop executing 
+            sourceTerritory->addArmy(numberOfArmies);
+            //cout << "Player" << player->name << " and Player" << targetPlayer->name
+            //    << " are in negotiate. No fight is initiated." << endl;
+
+            airliftMsg = "Player " + to_string(player->name) + " and Player" + to_string(targetPlayer->name)
+                + " are in negotiate. No fight is initiated.\n";
+            return airliftMsg;
+        }
+
+        if (targetTerritory->getpId() == 0) {
+            //cout << "The target Player is Neutral player" << endl;
+            airliftMsg = "The target Player is Neutral player\n";
+        }
+        //start the war: find the number of armies that terr has smaller amrypool
         int numberOfRound;
         if (numberOfArmies <= targetTerritory->getArmyNum()) {
             numberOfRound = numberOfArmies;
@@ -563,35 +666,63 @@ void Airlift::execute() {
             if (attacker < 6) {
                 //attacker will kill a defender and this round end 
                 targetTerritory->setArmy(targetTerritory->getArmyNum() - 1);
-                /*        cout << " attacker from ["<< sourceTerritory->gettName()
-                            <<"] kill a defender in ["<< targetTerritory->gettName()<<"]"<<endl;*/
+                /*cout << " Attacker from Player [" << sourceTerritory->getpId() <<
+                    "] [" << sourceTerritory->gettName()
+                    << "] kill a defender in Player [" << targetTerritory->getpId() <<
+                    "[" << targetTerritory->gettName() << "]" << endl;*/
+
+                airliftMsg += "Attacker from Player [" + to_string(sourceTerritory->getpId()) + "] ["
+                    + sourceTerritory->gettName() + "] kill a defender in Player [" + to_string(targetTerritory->getpId())
+                    + "] [" + targetTerritory->gettName() + "]\n";
             }
             if (defender < 7) {
                 //defender will kill a attacker
                 numberOfArmies -= 1;
-                /* cout << " defender in [" << targetTerritory->gettName()
-                     << "] kill a attacker from [" << sourceTerritory->gettName() << "]" << endl;*/
+                /*cout << " Defender from Player [" << targetTerritory->getpId() <<
+                    "] [" << targetTerritory->gettName()
+                    << "] kill a attacker in Player [" << sourceTerritory->getpId() <<
+                    "[" << sourceTerritory->gettName() << "]" << endl;*/
+
+                airliftMsg += "Defender from Player [" + to_string(targetTerritory->getpId()) + "] ["
+                    + targetTerritory->gettName() + "] kill an attacker in Player [" + to_string(sourceTerritory->getpId())
+                    + "] [" + sourceTerritory->gettName() + "]\n";
             }
         }
         //ending the fights and check the result
         // conqure happens
         if (targetTerritory->getArmyNum() == 0 && numberOfArmies != 0) {
+            // only remove territory from actual player, not netural player
+            if (targetTerritory->getpId() != 0) {
+                targetPlayer->removeTerrByTID(targetTerritory->gettId());
+            }
             targetTerritory->setpId(player->name);
             player->addTerr(targetTerritory);
-            targetPlayer->removeTerrByTID(targetTerritory->gettId());
             targetTerritory->addArmy(numberOfArmies);
             player->conquer = true;//player win the war and conquered a terr
-            cout << " attacker from [" << player->name
-                << "] win and conquered [" << targetTerritory->gettName() << "]" << " of Player " << targetPlayer->name << endl;
+            //cout << " Attacker from Player [" << sourceTerritory->getpId() <<
+            //    "] [" << sourceTerritory->gettName()
+            //    << "] won and conquered Player [" << targetTerritory->getpId() <<
+            //    "[" << targetTerritory->gettName() << "]" << endl;
+
+            airliftMsg += "Attacker from Player [" + to_string(sourceTerritory->getpId()) + "] ["
+                + sourceTerritory->gettName() + "] won and conquered Player [" + to_string(targetTerritory->getpId())
+                + "] [" + targetTerritory->gettName() + "]\n";
         }
         else
         {
             // send the survivors back to source territory
             sourceTerritory->addArmy(numberOfArmies);
+            //cout << "conquer was not successful," << numberOfArmies <<
+            //    " survivor went back to [" << sourceTerritory->gettName() << endl;
+
+            airliftMsg += "conquer was not successful," + to_string(numberOfArmies)
+                + " survivor went back to [" + sourceTerritory->gettName() + "]\n";
+
         }
         //cout << *this;//print a message to show detailes 
 
     }
+    return airliftMsg;
 }
 
 void Airlift::PrintMsg() const {

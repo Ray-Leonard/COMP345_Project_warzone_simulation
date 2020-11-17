@@ -16,13 +16,14 @@ class Player;
 
 class Territory
 {
+public:
     string tName; //territory name
     int tID; //territory id
     int cID; //continent id this territory belongs to
     string cName; //continent name this territory belongs to
     int pID; //player id
     int armyNum; //num of army 
-public:
+
     vector<int> adjacentTerritoryVec; //adjacent territories vector for current territory
     /*
     subgraph, contains relationship between territories in the current continent
@@ -64,6 +65,7 @@ public:
 
 class Continent
 {
+public:
     string continentName;
     int cId; //continent id
     int bonusArmyNum; //# of army a player will get if he/she occupies all countries in current continent
@@ -75,8 +77,6 @@ class Continent
     */
     vector<int> allTerritories;
 
-
-public:
     Continent();
     Continent(int cId, string cName, int bonusArmyNum);
     Continent(const Continent &obj);

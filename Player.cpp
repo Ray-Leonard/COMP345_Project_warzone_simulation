@@ -14,6 +14,8 @@ Player::Player()
 	armyPool = 0;
 	orders = new OrdersList();
 	conquer = false;
+	IfNegotiate = false;
+	toAdvanceTime = 20;
 	currentPhase = 0;
 }
 
@@ -32,6 +34,8 @@ Player::Player(const Player& p)
 	name = p.name;
 	armyPool = p.armyPool;
 	conquer = p.conquer;
+	IfNegotiate = p.IfNegotiate;
+	toAdvanceTime = p.toAdvanceTime;
 	currentPhase = p.currentPhase;
 }
 
@@ -43,6 +47,8 @@ Player::Player(int pname)
 	orders = new OrdersList();
 	name = pname;
 	conquer = false;
+	IfNegotiate = false;
+	toAdvanceTime = 20;
 	currentPhase = 0;
 }
 
@@ -87,6 +93,7 @@ void Player::removeTerrByTID(int tid)
 	for (int i = 0; i < territories.size(); i++) {
 		if (territories.at(i)->gettId() == tid) {
 			territories.erase(territories.begin()+i);
+			break;
 		}
 	}
 }
@@ -108,14 +115,30 @@ bool Player::hasTerritory(int territoryID)
 	return false;
 }
 
+void Player::resetToAdvanceTime()
+{
+	toAdvanceTime = 20;
+}
 
-vector<Territory*> Player::toDefend() {
+vector<Territory*> Player::toDefend(Map* map) {
 	// return all the territories this player currently owns
 	vector<Territory*> terrDefend;
-	for (unsigned int i = 0; i < territories.size(); ++i)
+	vector<Territory*> toAtk = toAttack(map);
+
+	for (unsigned int i = 0; i < toAtk.size(); ++i)
 	{
-		terrDefend.push_back(territories.at(i));
+		// get all adjacent territories of this territory
+		vector<int> adjTerr = toAtk.at(i)->getAdjacentTerritoryVec();
+		// only add those do not belong to this player to the terrAttack list
+		for (unsigned int j = 0; j < adjTerr.size(); ++j)
+		{
+			if (hasTerritory(adjTerr.at(j)))
+			{
+				terrDefend.push_back(map->getTerritoryById(adjTerr.at(j)));
+			}
+		}
 	}
+
 	return terrDefend;
 }
 
@@ -143,9 +166,9 @@ vector<Territory*> Player::toAttack(Map* map) {
 
 //IssueOrder() will creat a order obj and add it to player's order list
 bool Player::issueOrder(Map* map, Deck* deck, vector<Player*>& playerList)
-{	
+{
 	vector<Territory*> toAtk = toAttack(map);
-	vector<Territory*> toDef = toDefend();
+	vector<Territory*> toDef = toDefend(map);
 	// issue the deploy order first until no remaining army is in the reinforcement pool
 	if (armyPool > 0)
 	{
@@ -156,59 +179,45 @@ bool Player::issueOrder(Map* map, Deck* deck, vector<Player*>& playerList)
 
 		orders->queue(new Deploy(this, toDef.at(toDefendTerrIndex), armyToDeploy));
 
-		int randint = rand() % this->territories.size() + 1;
-		//orders->queue(new Advance(this, 1, this->territories.at(0), 
-			//map->getTerritoryById(this->territories.at(randint-1)->getAdjacentTerritoryVec().at(0))));
-		
-		int randAtk = rand() % toAtk.size();
-		int randDef= rand() % toDef.size();
-		Player* targetPlayer = nullptr;
-
-
-		for (int i = 0; i < 10; i++) {
-			int armyToAdvance = rand() % 10 + 1;
-			randDef = rand() % toDef.size();
-
-			Territory* source = toDef.at(randDef);
-			int adjIndex = rand() % (toDef.at(randDef)->adjacentTerritoryVec.size());
-			Territory* target = map->getTerritoryById(toDef.at(randDef)->adjacentTerritoryVec.at(adjIndex));
-
-			int targetPlayerID = target->getpId();
-			// findt he target player reference
-			for (unsigned int i = 0; i < playerList.size(); ++i)
-			{
-				if (playerList.at(i)->name == targetPlayerID)
-				{
-					targetPlayer = playerList.at(i);
-					break;
-				}
-			}
-
-			orders->queue(new Advance(this,armyToAdvance,targetPlayer,source, target));
-
-			//orders->queue(new Bomb(this,this->territories.at(0), toAtk.at(randAtk)));
-		}
-
-
-
-		//orders->queue(new Airlift(this, 1, this->territories.at(0),toAtk.at(randAtk-1)));
-		
-		//orders->queue(new Blockade(this, toDef.at(randDef - 1)));
 		return true;
 	}
-
-	// issue advance order multiple times
-	/*for (int i = 0; i < 3; i++) {
-		orders->queue(new Advance(this, 3, this->territories.at(0), toAtk.at(0)));
+	// issue advande order according to precoded toAdvanceTime times
+	if (toAdvanceTime > 0)
+	{
+		toAdvanceTime--;
+		//calling advance order--------------------------------------------------------
+		int randAtk = rand() % toAtk.size();
+		int randDef = rand() % toDef.size();
+		Territory* source = toDef.at(randDef);
+		Territory* target = toAtk.at(randAtk);
+		Player* targetPlayer = nullptr;
+		int targetPlayerID = target->getpId();
+		// findt he target player reference
+		for (unsigned int i = 0; i < playerList.size(); ++i)
+		{
+			if (playerList.at(i)->name == targetPlayerID)
+			{
+				targetPlayer = playerList.at(i);
+				break;
+			}
+		}
+		int armyToAdvance = rand() % (source->getArmyNum() + 1);
+		orders->queue(new Advance(this, armyToAdvance, targetPlayer, source, target));
 		return true;
-	}*/
+	}
 
 	// play a card if player has a card [completed logic here but need to do modifications in Cards.cpp/.h]
 	if (cards->getRamainingNum() > 0)
 	{
 		Card* c = cards->getCard();
-		// play the card that creates an order FIXME!!!!!!
-		orders->queue(c->play());
+		// play the card that creates an order
+		Order* o = c->play(this, toAtk, toDef, playerList);
+		// only add the order if card is actually being played
+		if (o != nullptr)
+		{
+			orders->queue(o);
+		}
+
 		// remove the card from hand
 		cards->remove(c);
 		// add the card back to deck
@@ -216,7 +225,6 @@ bool Player::issueOrder(Map* map, Deck* deck, vector<Player*>& playerList)
 
 		return true;
 	}
-
 	// if no more orders to be issued, return false
 	return false;
 }
@@ -226,12 +234,12 @@ Player& Player::operator=(const Player& p)
 {
 	if (&p != this) {
 		name = p.name;
-		for (unsigned int i = 0; i < p.territories.size(); i++) {
-			Territory* temp_terr = new Territory(*(p.territories.at(i)));
-			territories.push_back(temp_terr);
-		}
+		territories = p.territories;
 		cards = p.cards;
 		orders = p.orders;
+		IfNegotiate = p.IfNegotiate;
+		toAdvanceTime = p.toAdvanceTime;
+		currentPhase = p.currentPhase;
 	}
 	return *this;
 }
