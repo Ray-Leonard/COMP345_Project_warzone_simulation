@@ -38,7 +38,9 @@ private:
     // prints a snapshot of how many armies each player have in their army pool
     void printPlayerArmy();
     // prints a snapshot of which territory each player has
-    void printPlayerTerritory();
+    //void printPlayerTerritory();
+    // count the percentage of the world controlled by each player
+    string getPercentOfWorld() const;
     /*-------------------------------------------*/
 
 

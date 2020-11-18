@@ -123,7 +123,7 @@ ostream& operator<<(std::ostream& out, const Deploy& toOutput)
         }
         else
         {
-            out << "*Deploy* order of [" << toOutput.player->name << "] was not a valid order!" << endl;
+            out << "*Deploy* order of player [" << toOutput.player->name << "] was not a valid order!" << endl;
         }
     }
     return out;
@@ -242,7 +242,7 @@ string Advance::execute() {
 
         if (targetTerritory->getpId() == 0) {
             //cout << "The target Player is Neutral player" << endl;
-            advanceMsg = "The target Player is Neutral player";
+            //advanceMsg = "The target Player is Neutral player\n";
         }
 
         //start the war: find the number of armies that terr has smaller amrypool
@@ -331,7 +331,7 @@ std::ostream& operator<<(std::ostream& out, const Advance& toOutput) {
     //issue order phase
     if (!toOutput.wasExecuted && toOutput.player->currentPhase == 3) {
         out << "*Advance Order*" << " move " << toOutput.numberOfArmies
-            << " army to player[" << toOutput.targetTerritory->getpId() << "] ["
+            << " army to territory[" << toOutput.targetTerritory->getpId() << "] ["
             << toOutput.targetTerritory->gettName() << "]" << endl;
     }
 
@@ -340,14 +340,14 @@ std::ostream& operator<<(std::ostream& out, const Advance& toOutput) {
         if (toOutput.wasExecuted)
         {
             out << "*Advance* Player[" << toOutput.player->name << "] has moved " << toOutput.numberOfArmies
-                << " army to player[" << toOutput.targetTerritory->getpId() << "] ["
+                << " army to territory[" << toOutput.targetTerritory->getpId() << "] ["
                 << toOutput.targetTerritory->gettName() << "] . Army# ["
                 << toOutput.targetTerritory->getArmyNum() << "] in ["
                 << toOutput.targetTerritory->gettName() << "] " << endl;
         }
         else
         {
-            out << "*Advance* order of [" << toOutput.player->name << "] was not a valid order!" << endl;
+            out << "*Advance* order of player [" << toOutput.player->name << "] was not a valid order!" << endl;
         }
     }
     return out;
@@ -381,7 +381,7 @@ bool Bomb::validate() {
 
 string Bomb::execute() {
     if (!validate()) {
-        cout << *this;
+        //cout << *this;
         return "";
     }
     wasExecuted = true;
@@ -398,7 +398,7 @@ void Bomb::PrintMsg() const {
 std::ostream& operator<<(std::ostream& out, const Bomb& toOutput) {
     //issue order phase
     if (!toOutput.wasExecuted && toOutput.player->currentPhase == 3) {
-        out << "*Bomb Order*" << " remave half armies in player [" 
+        out << "*Bomb Order*" << " remove half armies in player [" 
             << toOutput.targetTerritory->getpId() << "] ["
             << toOutput.targetTerritory->gettName() << "]"<< endl;
     }
@@ -407,14 +407,14 @@ std::ostream& operator<<(std::ostream& out, const Bomb& toOutput) {
     if (toOutput.player->currentPhase == 4) {
         if (toOutput.wasExecuted)
         {
-            out << "*Bomb* [" << toOutput.player->name << "] has remaved half armies in player ["
+            out << "*Bomb* [" << toOutput.player->name << "] has removed half armies in player ["
                 << toOutput.targetTerritory->getpId() << "] ["
                 << toOutput.targetTerritory->gettName() << "]. Number of armies in target territory changes to "
                 << toOutput.targetTerritory->getArmyNum() << endl;
         }
         else
         {
-            out << "*Bomb* order of [" << toOutput.player->name << "] was not a valid order!" << endl;
+            out << "*Bomb* order of player [" << toOutput.player->name << "] was not a valid order!" << endl;
         }
     }
     return out;
@@ -491,7 +491,7 @@ std::ostream& operator<<(std::ostream& out, const Blockade& toOutput) {
         }
         else
         {
-            out << "*Blockade* order of [" << toOutput.player->name << "] was not a valid order!" << endl;
+            out << "*Blockade* order of player [" << toOutput.player->name << "] was not a valid order!" << endl;
         }
     }
     return out;
@@ -542,14 +542,23 @@ string Negotiate::execute() {
 }
 
 std::ostream& operator<<(std::ostream& out, const Negotiate& toOutput) {
-    if (toOutput.wasExecuted)
-    {
-        out << "*Negotiate* [" << toOutput.player->name << "] has block attack from player ["
+    //issue order phase
+    if (!toOutput.wasExecuted && toOutput.player->currentPhase == 3) {
+        out << "*Negotiate Order* block attack from player ["
             << toOutput.targetPlayer->name << "] " << endl;
     }
-    else
-    {
-        out << "*Negotiate* order of [" << toOutput.player->name << "] was not a valid order!" << endl;
+
+    //execute phase output
+    if (toOutput.player->currentPhase == 4) {
+        if (toOutput.wasExecuted)
+        {
+            out << "*Negotiate* [" << toOutput.player->name << "] has block attack from player ["
+                << toOutput.targetPlayer->name << "] " << endl;
+        }
+        else
+        {
+            out << "*Negotiate* order of player [" << toOutput.player->name << "] was not a valid order!" << endl;
+        }
     }
     return out;
 }
@@ -647,7 +656,7 @@ string Airlift::execute() {
 
         if (targetTerritory->getpId() == 0) {
             //cout << "The target Player is Neutral player" << endl;
-            airliftMsg = "The target Player is Neutral player\n";
+            //airliftMsg = "The target Player is Neutral player\n";
         }
         //start the war: find the number of armies that terr has smaller amrypool
         int numberOfRound;
@@ -737,8 +746,8 @@ const int Airlift::getPriority() const
 std::ostream& operator<<(std::ostream& out, const Airlift& toOutput) {
     //issue order phase
     if (!toOutput.wasExecuted && toOutput.player->currentPhase == 3) {
-        out << "*Airlift Order*" << toOutput.player->name << "] has moved " << toOutput.numberOfArmies
-            << " army to player[" << toOutput.targetTerritory->getpId() << "] ["
+        out << "*Airlift Order* move " << toOutput.numberOfArmies
+            << " army to territory [" << toOutput.targetTerritory->getpId() << "] ["
             << toOutput.targetTerritory->gettName() << "]" <<endl;
     }
 
@@ -747,14 +756,14 @@ std::ostream& operator<<(std::ostream& out, const Airlift& toOutput) {
         if (toOutput.wasExecuted)
         {
             out << "*Airlift* Player[" << toOutput.player->name << "] has moved " << toOutput.numberOfArmies
-                << " army to player[" << toOutput.targetTerritory->getpId() << "] ["
+                << " army to territory[" << toOutput.targetTerritory->getpId() << "] ["
                 << toOutput.targetTerritory->gettName() << "] . Army# ["
                 << toOutput.sourceTerritory->getArmyNum() << "] in [ "
                 << toOutput.sourceTerritory->gettName() << "] " << endl;
         }
         else
         {
-            out << "*Airlift* order of [" << toOutput.player->name << "] was not a valid order!" << endl;
+            out << "*Airlift* order of player [" << toOutput.player->name << "] was not a valid order!" << endl;
         }
     }
     return out;

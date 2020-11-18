@@ -9,7 +9,7 @@ class Observer {
 public:
 	Observer();
 	virtual ~Observer();
-	virtual void update(string phase, Player* p, Order* o, string msg) = 0;
+	virtual void update(Map* m, Player* p, Order* o, string msg) = 0;
 //protected:
 };
 
@@ -19,8 +19,8 @@ public:
 	PhaseObserver(GameEngine* phaseSub);
 	PhaseObserver(const PhaseObserver& phaseObserver);
 	~PhaseObserver();
-	void update(string phase, Player* p, Order* o, string msg);
-	void displayPhaseInfo(string phase, Player* p, Order* o, string msg);
+	void update(Map* m, Player* p, Order* o, string msg);
+	void displayPhaseInfo(Map* m, Player* p, Order* o, string msg);
 protected:
 	GameEngine* _phaseSubject;
 };
@@ -31,8 +31,8 @@ public:
 	StatisticObserver(GameEngine* statisticSub);
 	StatisticObserver(const StatisticObserver& statisticObserver);
 	~StatisticObserver();
-	void update(string phase, Player* p, Order* o, string msg);
-	void displayWorldDomination(string phase, Player* p, Order* o, string msg);
+	void update(Map* m, Player* p, Order* o, string msg);
+	void displayWorldDomination(Map* m, Player* p, Order* o, string msg);
 protected:
 	GameEngine* _statisticSubject;
 };
@@ -41,7 +41,7 @@ class Subject {
 public: 
 	virtual void attach(Observer* o);
 	virtual void detach(Observer* o);
-	virtual void notify(string phase, Player* p, Order* o, string msg);
+	virtual void notify(Map* m, Player* p, Order* o, string msg);
 	Subject();
 	~Subject();
 private:

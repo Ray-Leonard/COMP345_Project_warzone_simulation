@@ -120,7 +120,7 @@ public:
     static Continent* getContinentById(int cId);
     static Territory* getTerritoryById(int tID);
 
-    void printNodes();
+    void printNodes(); //print graph
     bool* mapDFS(int start_node, const int nodes_num); //pass the start node
     //node: the start node, visited: an array to mark if a node is visited or not, vec: adjacency vector
     void mapTraverseFunc(int start_node, bool visited[]);
@@ -128,7 +128,6 @@ public:
 
     //check if the map is connected graph
     bool validate();
-    void printGraph();
 
     //output a table
     friend ostream& operator <<(ostream& output, Map& map_obj);

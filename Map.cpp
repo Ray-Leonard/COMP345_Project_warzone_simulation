@@ -97,7 +97,7 @@ void Territory::printAllAdjWithinSameConti() {
 ostream& operator <<(ostream& output, Territory& obj) {
     output.width(12);
     output << obj.tName;
-    output << "\t" << obj.tID << "\t" << obj.pID << "\t\t" << obj.armyNum << "\t\t\t" << obj.cName <<endl;
+    output << "\t" << obj.tID << "\t" << obj.pID << "\t" << obj.armyNum << "\t\t" << obj.cName <<endl;
     return output;
 }
 
@@ -335,37 +335,6 @@ bool Map::validate() {
     }
     cout << "This is a valid map!" << endl;
     return true;
-}
-void Map::printGraph() {
-    int size = numOfTrritories;
-    // dynamically allocated 2-d array
-    int ** arr = new int* [size];
-    for (int i = 0; i < size; ++i)
-    {
-        arr[i] = new int[size];
-    }
-
-    for(int i=0;i<size;i++){
-        for(int j=0;j<size;j++){
-            arr[i][j]=0;
-        }
-    }
-    for(int i=0;i<size;i++){
-        int f = (*(allNodes[i])).gettId();
-        arr[i][f-1]=1;
-        int j = (allNodes[i]->adjacentTerritoryVec).size();
-        for(int n=0;n<j;n++){
-            arr[i][(allNodes[i]->adjacentTerritoryVec)[n]-1]=1;
-        }
-    }
-    cout<<"\tA1\tB2\tC3\tD4\tE5\tF6"<<endl;
-    for(int n=0;n<size;n++){
-        cout<<allNodes[n]->gettName()<<"\t";
-        for(int j=0;j<size;j++){
-            cout<<arr[n][j]<<"\t";
-        }
-        cout<<endl;
-    }
 }
 
 ostream& operator <<(ostream& output, Map& map_obj) {

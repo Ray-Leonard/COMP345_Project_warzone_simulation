@@ -57,6 +57,10 @@ GameEngine::~GameEngine()
         delete pl.at(i);
         pl.at(i) = nullptr;
     }
+    delete phaseObserver;
+    phaseObserver = nullptr;
+    delete statisticObserver;
+    statisticObserver = nullptr;
     pl.clear();
 }
 
@@ -122,11 +126,13 @@ void GameEngine::printPlayerSequence()
     
     string playerOrder = "";
     //cout << "The player is now playing in the following order:" << endl;
+    Player* p = nullptr;
     for(int i = 0; i < numOfPlayers; i++){
         playerOrder = playerOrder.append(" Player " + to_string(pl[i]->name));
+        p = (pl[i]);
         //cout << pl[i]->name << " ";
     }
-    notify("startup", NULL, NULL, playerOrder);
+    notify(nullptr, p, NULL, playerOrder); //delete p in PhaseObserver
     //cout << endl << endl;
 }
 
@@ -135,7 +141,7 @@ void GameEngine::printPlayerArmy()
     //cout << "The players have the following army in startup phase: " << endl;
     for(int i = 0; i < numOfPlayers; ++i){
         pl.at(i)->currentPhase = 1;
-        notify("startup", pl[i], NULL, "");
+        notify(nullptr, pl[i], NULL, "");
         //cout << "[" << pl[i]->name << "] has army: " << pl[i]->armyPool << endl;
     }
     //cout << endl;
@@ -150,22 +156,47 @@ void GameEngine::printPlayerArmy()
 //    cout << endl;
 //}
 
+string GameEngine::getPercentOfWorld() const {
+    // get percentage of the world controlled by each player
+    string percentMsg = "";
+    for (int i = 0; i < numOfPlayers; ++i)
+    {
+        double perc = (double)pl.at(i)->territories.size() / m->getNumOfTrritories() * 100;
+
+        //if the player is not eliminated
+        if (pl.at(i)->name) {
+            percentMsg += "Player [" + to_string(pl.at(i)->name) + "] owns " + to_string(perc) + "% of the world.\n";
+        }
+    }
+    return percentMsg;
+}
+
 void GameEngine::setObserverSwitch()
 {
-    string obs = "";
-    cout << "Need observer (Yes/No)? ";
-    cin>>obs;
-    transform(obs.begin(), obs.end(), obs.begin(), ::toupper);
+    string phaseObs = "";
+    string statisticObs = "";
+    cout << "Need phase observer (Yes/No)? ";
+    cin>> phaseObs;
+    cout << "Need statistic observer (Yes/No)? ";
+    cin >> statisticObs;
+    transform(phaseObs.begin(), phaseObs.end(), phaseObs.begin(), ::toupper);
+    transform(statisticObs.begin(), statisticObs.end(), statisticObs.begin(), ::toupper);
 
-    if(obs == "YES" || obs == "Y" || obs=="1"){
-        cout << "need observer" << endl;
+    if(phaseObs == "YES" || phaseObs == "Y" || phaseObs =="1"){
+        cout << "Need phase observer" << endl;
         observerFlag = true;
         phaseObserver = new PhaseObserver(this);
+        //statisticObserver = new StatisticObserver(this);
+    }
+    if (statisticObs == "YES" || statisticObs == "Y" || statisticObs == "1") {
+        cout << "Need statistic observer" << endl;
+        observerFlag = true;
         statisticObserver = new StatisticObserver(this);
     }
-    else{
+    if(!observerFlag)
+    {
         cout<< "no need observer" << endl;
-        observerFlag = false;
+        //observerFlag = false;
     }
     cout << endl;
 }
@@ -179,6 +210,7 @@ bool GameEngine::gameCheck()
         if (pl.at(i)->getTerrNumber() == 0)
         {
             loserName.push_back(pl.at(i)->name);
+            notify(m, pl.at(i), NULL, "eliminate");
         }
     }
 
@@ -220,7 +252,7 @@ void GameEngine::issueOrdersPhase()
         pl.at(i)->resetToAdvanceTime();
 
         //phase observer
-        notify("issueorder", pl.at(i), NULL, "");
+        notify(nullptr, pl.at(i), NULL, "");
     }
 }
 
@@ -240,6 +272,7 @@ void GameEngine::executeOrdersPhase()
         }
         
     }
+
     // then execute all the orders
     while (allOrders.size() > 0)
     {
@@ -248,7 +281,7 @@ void GameEngine::executeOrdersPhase()
         Order* o = allOrders.top();
         string msg = o->execute();
         allOrders.pop();
-        notify("execute", NULL, o, msg); //phase observer
+        notify(nullptr, o->getPlayer(), o, msg); //phase observer
         delete o;
         o = nullptr;
         //std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -358,8 +391,15 @@ void GameEngine::startupPhase()
     printPlayerSequence();
     printPlayerArmy();
 
-    //Yilu: don't need this method, merge print Territory into notify() in printPlayerArmy()
-    //printPlayerTerritory();
+
+    //for (int i = 0; i < numOfPlayers; i++) {
+    //    cout << "[" << pl.at(i)->name << "] owns the following territories:" << endl;
+    //    pl[i]->printTerrOwn();
+    //}
+    string percentMsg = getPercentOfWorld();
+
+    //statistic observer
+    notify(m, NULL, NULL, percentMsg);
 }
 
 //Give the number of armiea to players 
@@ -402,7 +442,7 @@ void GameEngine::reinforcementPhase()
         int addedArmies = pl.at(i)->armyPool - originalArmyPool; 
 
         //call PhaseObserver
-        notify("reinforcement", pl.at(i), NULL, to_string(addedArmies));
+        notify(nullptr, pl.at(i), NULL, to_string(addedArmies));
         //cout << pl.at(i)->name << " army #: " << pl.at(i)->armyPool << endl;
     }
 
@@ -414,28 +454,34 @@ void GameEngine::mainGameLoop()
     int i = 0;
     while (true) {
         i += 1;
-    //set armies calling reinforcementPhase
-    reinforcementPhase();
-    //Players issue orders and place them in their order list 
-    issueOrdersPhase();
-    //the game engine proceeds to execute the top order 
-    //on the list of orders of each player 
-    executeOrdersPhase();
-    // print all territory player owns
-    for (int i = 0; i < numOfPlayers; ++i)
-    {
-        cout << "Player" << pl.at(i)->name << " owns the following territories: " << endl;
-        pl.at(i)->printTerrOwn();
-        cout << *pl.at(i)->cards;
+        //set armies calling reinforcementPhase
+        reinforcementPhase();
+        //Players issue orders and place them in their order list 
+        issueOrdersPhase();
+        //the game engine proceeds to execute the top order 
+        //on the list of orders of each player 
+        executeOrdersPhase();
+
+        // print cards owned by all players
+        for (int i = 0; i < numOfPlayers; ++i)
+        {
+            notify(NULL, pl.at(i), NULL, "card");
+        }
+
+        string percentMsg = getPercentOfWorld();
+
+        //call statistic observer
+        notify(m, NULL, NULL, percentMsg);
+
+        //then back to reinforcementPhase
+        if (gameCheck())
+        {
+            //cout << "Player" << pl.at(0)->name << " has won the game!" << endl;
+            notify(m, pl.at(0), NULL, "win"); //notify statistic observer the winner
+            break;
+        }
     }
-    //then back to reinforcementPhase
-    if (gameCheck())
-    {
-        cout << "Player" << pl.at(0)->name << " has won the game!" << endl;
-        break;
-    }
-    }
-    cout << "GAME OVER";
+    //cout << "GAME OVER";
 }
 
 int main()

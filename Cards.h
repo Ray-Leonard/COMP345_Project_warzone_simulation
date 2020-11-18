@@ -77,6 +77,7 @@ public:
 	int getRamainingNum();
 	Card* getCard();
 	int getCapacity() const;
+	int getNumOfCards() const { return handOfCards.size(); }
 	vector<Card*> getHandOfCards() const;
 
 	// operator overloading

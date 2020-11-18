@@ -248,7 +248,7 @@ Hand& Hand::operator = (const Hand& src)
 
 ostream& operator << (ostream& output, Hand& hand)
 {
-	output << "The current player has the following cards in hand: " << endl;
+	//output << "The current player has the following cards in hand: " << endl;
 	for (unsigned int i = 0; i < hand.getHandOfCards().size(); ++i)
 	{
 		output << *hand.getHandOfCards().at(i);
