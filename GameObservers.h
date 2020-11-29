@@ -21,6 +21,9 @@ public:
 	~PhaseObserver();
 	void update(Map* m, Player* p, Order* o, string msg);
 	void displayPhaseInfo(Map* m, Player* p, Order* o, string msg);
+	PhaseObserver& operator= (const PhaseObserver& src);
+	friend ostream& operator<<(std::ostream& out, const PhaseObserver& phaseObs);
+
 protected:
 	GameEngine* _phaseSubject;
 };
@@ -33,6 +36,9 @@ public:
 	~StatisticObserver();
 	void update(Map* m, Player* p, Order* o, string msg);
 	void displayWorldDomination(Map* m, Player* p, Order* o, string msg);
+	StatisticObserver& operator= (const StatisticObserver& src);
+	friend ostream& operator<<(std::ostream& out, const StatisticObserver& phaseObs);
+
 protected:
 	GameEngine* _statisticSubject;
 };

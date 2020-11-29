@@ -24,6 +24,12 @@ PhaseObserver::~PhaseObserver() {
 	_phaseSubject->detach(this);
 }
 
+PhaseObserver& PhaseObserver::operator= (const PhaseObserver& src)
+{
+	_phaseSubject = new GameEngine(*src._phaseSubject);
+	return *this;
+}
+
 void PhaseObserver::update(Map* m, Player* p, Order* o, string msg) {
 	displayPhaseInfo(m, p, o, msg);
 }
@@ -72,7 +78,12 @@ void PhaseObserver::displayPhaseInfo(Map* m, Player* p, Order* o, string msg) {
 	//system("cls"); //clear the console
 }
 
+ostream& operator<< (ostream& output, PhaseObserver& phaseObs)
+{
 
+	output << "Phase Observer" << endl;
+	return output;
+}
 
 
 
@@ -92,6 +103,12 @@ StatisticObserver::StatisticObserver(const StatisticObserver& statisticObserver)
 
 void StatisticObserver::update(Map* m, Player* p, Order* o, string msg) {
 	displayWorldDomination(m, p, o, msg);
+}
+
+StatisticObserver& StatisticObserver::operator= (const StatisticObserver& src)
+{
+	_statisticSubject = new GameEngine(*src._statisticSubject);
+	return *this;
 }
 
 void StatisticObserver::displayWorldDomination(Map* m, Player* p, Order* o, string msg) {
@@ -123,6 +140,13 @@ void StatisticObserver::displayWorldDomination(Map* m, Player* p, Order* o, stri
 	}
 }
 
+ostream& operator<< (ostream& output, StatisticObserver& statisObs)
+{
+
+	output << "Statistic Observer" << endl;
+	return output;
+}
+
 
 //Subject class
 Subject::Subject() {
@@ -130,7 +154,6 @@ Subject::Subject() {
 }
 
 Subject::~Subject() {
-	//delete every Observer* inside
 	delete _observers;
 }
 
