@@ -1,7 +1,4 @@
-
-#ifndef untitled_MAP_H
-#define untitled_MAP_H
-
+#pragma once
 #include <string>
 #include <list>
 #include <array>
@@ -128,10 +125,9 @@ public:
     //check if the map is connected graph
     bool validate();
 
+    //assignment operator
+    Map& operator=(const Map& map_obj);
+
     //output a table
     friend ostream& operator <<(ostream& output, Map& map_obj);
 };
-
-
-
-#endif 

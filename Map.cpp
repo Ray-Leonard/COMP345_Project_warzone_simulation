@@ -93,7 +93,7 @@ void Territory::printAllAdjWithinSameConti() {
 ostream& operator <<(ostream& output, Territory& obj) {
     output.width(12);
     output << obj.tName;
-    output << "\t" << obj.tID << "\t" << obj.pID << "\t" << obj.armyNum << "\t\t" << obj.cName <<endl;
+    output << "\t" << obj.tID << "\t" << obj.pID << "\t" << obj.armyNum << "\t" << obj.cName <<endl;
     return output;
 }
 
@@ -343,6 +343,14 @@ void Map::printAllMapNames() {
         cout << "#" << i + 1 << " " << allMapNames[i] << endl;
     }
     cout << endl;
+}
+
+Map& Map::operator=(const Map& map_obj) {
+    if (this != &map_obj) {
+        this->numOfContinents = map_obj.numOfContinents;
+        this->numOfTrritories = map_obj.numOfTrritories;
+    }
+    return *this;
 }
 
 ostream& operator <<(ostream& output, Map& map_obj) {
