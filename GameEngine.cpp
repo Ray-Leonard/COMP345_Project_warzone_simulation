@@ -123,17 +123,13 @@ void GameEngine::shufflePlayers()
 
 void GameEngine::printPlayerSequence()
 {
-    
     string playerOrder = "";
-    //cout << "The player is now playing in the following order:" << endl;
-    Player* p = nullptr;
     for(int i = 0; i < numOfPlayers; i++){
         playerOrder = playerOrder.append(" Player " + to_string(pl[i]->name));
-        p = (pl[i]);
+        pl.at(i)->currentPhase = 1;
         //cout << pl[i]->name << " ";
     }
-    notify(nullptr, p, NULL, playerOrder); //delete p in PhaseObserver
-    //cout << endl << endl;
+    notify(nullptr, pl.at(0), NULL, playerOrder); //delete p in PhaseObserver
 }
 
 void GameEngine::printPlayerArmy()

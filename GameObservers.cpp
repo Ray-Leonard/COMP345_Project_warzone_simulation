@@ -51,7 +51,7 @@ void PhaseObserver::displayPhaseInfo(Map* m, Player* p, Order* o, string msg) {
 			else {
 				cout << "All players: Startup phase." << endl;
 				cout << "The player is now playing in the following order:" << msg << endl << endl;
-				delete p;
+				//delete p;
 			}
 		}
 		else if (p->currentPhase == 3) {
