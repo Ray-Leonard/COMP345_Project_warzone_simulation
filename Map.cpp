@@ -1,7 +1,3 @@
-//
-// Created by Nian Liu on 2020-10-02.
-//
-
 #include "Map.h"
 #include <iostream>
 #include <iomanip>
@@ -228,6 +224,9 @@ Map::~Map() {
     }
     allContinents.clear();
 }
+
+string Map::allMapNames[4] = { "europe.map", "brasil.map", "greece.map", "spain.map" };
+
 int Map::getNumOfTrritories() { return numOfTrritories; }
 int Map::getNumOfContinents() { return numOfContinents; }
 void Map::setNumOfContinents(int conti_num) { numOfContinents = conti_num; }
@@ -335,6 +334,15 @@ bool Map::validate() {
     }
     cout << "This is a valid map!" << endl;
     return true;
+}
+
+void Map::printAllMapNames() {
+    int arrSize = sizeof(allMapNames) / sizeof(allMapNames[0]);
+    cout << "\nPlease select one from the following map: " << endl;
+    for (int i = 0; i < arrSize; i++) {
+        cout << "#" << i + 1 << " " << allMapNames[i] << endl;
+    }
+    cout << endl;
 }
 
 ostream& operator <<(ostream& output, Map& map_obj) {

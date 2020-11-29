@@ -70,6 +70,7 @@ void GameEngine::readMap()
     bool validFile = true;
     do {
         validFile = true;
+        Map::printAllMapNames();
         cout << "enter map name: ";
         string path = "";
         cin >> path;

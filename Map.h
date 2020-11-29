@@ -1,6 +1,3 @@
-//
-// Created by Nian Liu on 2020-10-02.
-//
 
 #ifndef untitled_MAP_H
 #define untitled_MAP_H
@@ -102,6 +99,7 @@ public:
 class Map
 {
 public:
+    static string allMapNames[4];
     static vector<Territory*> allNodes;
     static vector<Continent*> allContinents;
     int numOfTrritories;
@@ -111,6 +109,7 @@ public:
     Map(int terri_num, int conti_num);
     Map(const Map& obj);
     ~Map();
+    static void printAllMapNames();
     int getNumOfTrritories();
     int getNumOfContinents();
     void setNumOfContinents(int conti_num);
@@ -132,6 +131,7 @@ public:
     //output a table
     friend ostream& operator <<(ostream& output, Map& map_obj);
 };
+
 
 
 #endif 
