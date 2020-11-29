@@ -226,7 +226,7 @@ Map::~Map() {
 }
 
 string Map::allMlMapNames[4] = { "europe.map", "brasil.map", "greece.map", "spain.map" };
-string Map::allCmMapNames[4] = { "Africa.map", "Asia.map", "Australia.map", "Canada.map"};
+string Map::allCmMapNames[4] = { "Europe.map", "Earth.map", "Africa.map", "Canada.map"};
 
 int Map::getNumOfTrritories() { return numOfTrritories; }
 int Map::getNumOfContinents() { return numOfContinents; }

@@ -499,16 +499,16 @@ void GameEngine::mainGameLoop()
     //cout << "GAME OVER";
 }
 
-int main()
-{
-    // create a game engine object
-    GameEngine* ge = new GameEngine();
-    // execute the loading phase
-    ge->loadingPhase();
-    // execute the startup phase
-    ge->startupPhase();
-    // execute the main game loop
-    ge->mainGameLoop();
-
-    return 0;
-}
+//int main()
+//{
+//    // create a game engine object
+//    GameEngine* ge = new GameEngine();
+//    // execute the loading phase
+//    ge->loadingPhase();
+//    // execute the startup phase
+//    ge->startupPhase();
+//    // execute the main game loop
+//    ge->mainGameLoop();
+//
+//    return 0;
+//}
