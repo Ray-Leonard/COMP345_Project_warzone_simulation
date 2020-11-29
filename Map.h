@@ -96,7 +96,8 @@ public:
 class Map
 {
 public:
-    static string allMapNames[4];
+    static string allMlMapNames[4]; //all maps in MapLoader class
+    static string allCmMapNames[4]; //all maps in ConquestFileReader class
     static vector<Territory*> allNodes;
     static vector<Continent*> allContinents;
     int numOfTrritories;

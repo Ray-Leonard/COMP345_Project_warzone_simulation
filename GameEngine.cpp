@@ -71,14 +71,30 @@ void GameEngine::readMap()
     do {
         validFile = true;
         Map::printAllMapNames();
+
+        string mapType = "";
+        cout << "Select map type (Initial/Conquest): ";
+        cin >> mapType;
+
         cout << "enter map name: ";
         string path = "";
         cin >> path;
 
-        MapLoader* ml = new MapLoader(path);
+        transform(mapType.begin(), mapType.end(), mapType.begin(), ::toupper);
+        
+        MapLoader* ml = nullptr;
+        ConquestFileReaderAdapter* cfm = nullptr;
+
         try
         {
-            m = ml->loadingMap();
+            if (mapType == "INITIAL") {
+                ml = new MapLoader(path);
+                m = ml->loadingMap();
+            }
+            else{
+                cfm = new ConquestFileReaderAdapter(new ConquestFileReader(path));
+                m = cfm->loadingMap();
+            }
         }
         catch (int e)
         {
@@ -87,6 +103,8 @@ void GameEngine::readMap()
             m = nullptr;
             delete ml;
             ml = nullptr;
+            delete cfm;
+            cfm = nullptr;
         }
     } while (!validFile);
 }
@@ -481,16 +499,16 @@ void GameEngine::mainGameLoop()
     //cout << "GAME OVER";
 }
 
-//int main()
-//{
-//    // create a game engine object
-//    GameEngine* ge = new GameEngine();
-//    // execute the loading phase
-//    ge->loadingPhase();
-//    // execute the startup phase
-//    ge->startupPhase();
-//    // execute the main game loop
-//    ge->mainGameLoop();
-//
-//    return 0;
-//}
+int main()
+{
+    // create a game engine object
+    GameEngine* ge = new GameEngine();
+    // execute the loading phase
+    ge->loadingPhase();
+    // execute the startup phase
+    ge->startupPhase();
+    // execute the main game loop
+    ge->mainGameLoop();
+
+    return 0;
+}

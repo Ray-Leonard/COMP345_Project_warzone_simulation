@@ -60,22 +60,6 @@ Map* MapLoader::loadingMap() {
         throw -1;
     }
 
-    /*
-    variables for creating Continent, Trritory object
-    cNo: continent id
-    cName: continent name
-    bonusArmyNum: bonus army number if a play occupies all the territories/countries in current continent
-    tName: territory/country name
-    tNo: territory/country id
-    t_cNo: continent id that a country/territory belongs to
-    t_cName: continent name that a country/territory belongs to
-    str: the variable for reading a single string
-    c_ptr: continent obj pointer, used to add its territories
-    line: string variable for read line by line
-    hasContinents: check if the map file contains Continents section
-    hasCountries: check if the map file contains Countries/Territories section
-    hasBorders: check if the map file contains Borders section
-    */
     int cNo = 0, tNo=0, t_cNo=0, bonusArmyNum;
     string str, cName, tName, t_cName;
     bool hasContinents = false, hasCountries = false, hasBorders = false;
@@ -261,6 +245,12 @@ Map* MapLoader::loadingMap() {
 
 
 
+
+
+
+
+
+//adaptee
 ConquestFileReader::ConquestFileReader() {
     fileName = "no file path";
     map_ptr = new Map();
@@ -488,4 +478,22 @@ Map* ConquestFileReader::loadConquestMap() {
             << '\t' << itr->second << '\n';
     }*/
     return map_ptr;
+}
+
+
+
+
+
+ConquestFileReaderAdapter::ConquestFileReaderAdapter() : MapLoader(), cfr(nullptr) {}
+
+ConquestFileReaderAdapter::ConquestFileReaderAdapter(ConquestFileReader* cfr_ptr) : MapLoader(), cfr(cfr_ptr) {}
+
+ConquestFileReaderAdapter::~ConquestFileReaderAdapter() {
+    delete cfr;
+    cfr = nullptr;
+}
+
+Map* ConquestFileReaderAdapter::loadingMap() {
+    cout << "Read conquest map." << endl;
+    return cfr->loadConquestMap();
 }

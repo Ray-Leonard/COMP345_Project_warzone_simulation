@@ -6,6 +6,7 @@
 #include <sstream>
 using namespace std;
 
+//Target class
 class MapLoader {
     string filePath;
     Map* map_ptr; //a Map obj
@@ -14,7 +15,7 @@ public:
     MapLoader();
     MapLoader(string file_path);
     MapLoader(const MapLoader& ml_obj); //copy constructor
-    ~MapLoader(); //destructor
+    virtual ~MapLoader(); //destructor
 
     //getter
     string getFilePath();
@@ -23,7 +24,7 @@ public:
     void setFilePathPtr(string file_path);
 
     //load map and create Map obj, if map file is not valid, exit the program
-    Map* loadingMap();
+    virtual Map* loadingMap();
 
     //assignment operator overloading
     MapLoader& operator = (const MapLoader& ml_obj);
@@ -32,8 +33,6 @@ public:
     friend istream& operator >> (istream& input, MapLoader& mapLoader_obj);
     friend ostream& operator << (ostream& output, MapLoader& mapLoader_obj);
 };
-
-
 
 
 
@@ -63,4 +62,15 @@ public:
     //input/output stream operator overloading
     friend istream& operator>>(istream& input, ConquestFileReader& conMap_obj);
     friend ostream& operator<<(ostream& output, ConquestFileReader& conMap_obj);
+};
+
+
+//adapter class
+class ConquestFileReaderAdapter : public MapLoader {
+    ConquestFileReader* cfr;
+public:
+    ConquestFileReaderAdapter();
+    ConquestFileReaderAdapter(ConquestFileReader* cfr_ptr);
+    ~ConquestFileReaderAdapter();
+    virtual Map* loadingMap();
 };

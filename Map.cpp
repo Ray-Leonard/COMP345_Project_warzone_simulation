@@ -225,7 +225,8 @@ Map::~Map() {
     allContinents.clear();
 }
 
-string Map::allMapNames[4] = { "europe.map", "brasil.map", "greece.map", "spain.map" };
+string Map::allMlMapNames[4] = { "europe.map", "brasil.map", "greece.map", "spain.map" };
+string Map::allCmMapNames[4] = { "Africa.map", "Asia.map", "Australia.map", "Canada.map"};
 
 int Map::getNumOfTrritories() { return numOfTrritories; }
 int Map::getNumOfContinents() { return numOfContinents; }
@@ -337,10 +338,17 @@ bool Map::validate() {
 }
 
 void Map::printAllMapNames() {
-    int arrSize = sizeof(allMapNames) / sizeof(allMapNames[0]);
+    int arrSize = sizeof(allMlMapNames) / sizeof(allMlMapNames[0]);
+    int cmArrSize = sizeof(allCmMapNames) / sizeof(allCmMapNames[0]);
     cout << "\nPlease select one from the following map: " << endl;
+    cout << "Initial maps: " << endl;
     for (int i = 0; i < arrSize; i++) {
-        cout << "#" << i + 1 << " " << allMapNames[i] << endl;
+        cout << "#" << i + 1 << " " << allMlMapNames[i] << endl;
+    }
+    cout << endl;
+    cout << "Conquest maps: " << endl;
+    for (int i = 0; i < cmArrSize; i++) {
+        cout << "#" << i + 1 << " " << allCmMapNames[i] << endl;
     }
     cout << endl;
 }
