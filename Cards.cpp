@@ -1,11 +1,12 @@
 #include "Cards.h"
+#include "Player.h"
 using namespace std;
 
 /****************Implementation for Cards class ***********************/
 Card::Card()
 {
 	// The default card type is reinforcement
-	type = CardTypes::reinforcement;
+	type = CardTypes::bomb;
 }
 
 Card::Card(CardTypes _type)
@@ -23,14 +24,57 @@ Card::Card(const Card& src)
 	type = src.getType();
 }
 
-string Card::play()
+Order* Card::play(Player* player, vector<Territory*>& toAtk, vector<Territory*>& toDef, vector<Player*>& playerList)
 {
-	// 1. create special order
-	string order = "A card of type [" + toString() + "] has been played.";
-	// 2. remove from hand
-	// 3. put back to deck
-	// (the above is to be done by the game engine, for now, in the CardsDriver.cpp)
-	return order;
+	int randAtk = rand() % toAtk.size();
+	int randDef = rand() % toDef.size();
+	// create and return a bomb order
+	if (type == CardTypes::bomb)
+	{
+		return new Bomb(player, nullptr, toAtk.at(randAtk));
+	}
+	// create and return a blockade order
+	else if (type == CardTypes::blockade)
+	{
+		return new Blockade(player, toDef.at(randDef));
+	}
+	// create and return an airlift order
+	else if (type == CardTypes::airlift)
+	{
+		Territory* source = toDef.at(randDef);
+		Territory* target = toAtk.at(randAtk);
+		Player* targetPlayer = nullptr;
+		int targetPlayerID = target->getpId();
+		// findt he target player reference
+		for (unsigned int i = 0; i < playerList.size(); ++i)
+		{
+			if (playerList.at(i)->name == targetPlayerID)
+			{
+				targetPlayer = playerList.at(i);
+				break;
+			}
+		}
+		int armyToAirlift = rand() % (source->getArmyNum() + 1);
+
+		return new Airlift(player, armyToAirlift, targetPlayer, source, target);
+	}
+	// create and return a negotiate order
+	else if (type == CardTypes::diplomacy)
+	{
+		Player* targetPlayer = player;
+		// find the target player that is not the player himself
+		for (unsigned int i = 0; i < playerList.size(); ++i)
+		{
+			if (playerList.at(i) != player)
+			{
+				targetPlayer = playerList.at(i);
+				break;
+			}
+		}
+
+		return new Negotiate(player, targetPlayer, nullptr);
+	}
+	return nullptr;
 }
 
 CardTypes Card::getType() const
@@ -47,10 +91,6 @@ string Card::toString()
 
 	case CardTypes::bomb:
 		typeName = "bomb";
-		break;
-
-	case CardTypes::reinforcement:
-		typeName = "reinforcement";
 		break;
 
 	case CardTypes::blockade:
@@ -136,11 +176,12 @@ void Hand::dump()
 bool Hand::add(Card* card)
 {
 	// only can add a card when it does not reach the capacity
-	if (handOfCards.size() < capacity)
+	if ((int)handOfCards.size() < capacity)
 	{
 		handOfCards.push_back(card);
 		return true;
 	}
+
 	return false;
 }
 
@@ -173,6 +214,20 @@ vector<Card*> Hand::getHandOfCards() const
 	return handOfCards;
 }
 
+int Hand::getRamainingNum()
+{
+	return handOfCards.size();
+}
+
+Card* Hand::getCard(int index)
+{
+	if (handOfCards.size() > 0)
+	{
+		return handOfCards.at(index);
+	}
+	return nullptr;
+}
+
 Hand& Hand::operator = (const Hand& src)
 {
 	// copy over the capacity
@@ -193,10 +248,10 @@ Hand& Hand::operator = (const Hand& src)
 
 ostream& operator << (ostream& output, Hand& hand)
 {
-	output << "The current player has the following cards in hand: " << endl;
+	//output << "The current player has the following cards in hand: " << endl;
 	for (unsigned int i = 0; i < hand.getHandOfCards().size(); ++i)
 	{
-		output << *hand.getHandOfCards().at(i);
+		output << "[" << i << "]. " << *hand.getHandOfCards().at(i);
 	}
 
 	return output;
@@ -249,7 +304,7 @@ void Deck::initialize()
 	// fill the deck with #capacity many of cards, one kind at a time
 	for (int i = 0; i < capacity; ++i)
 	{
-		Card* c = new Card(static_cast<CardTypes>(i % 6));
+		Card* c = new Card(static_cast<CardTypes>(i % 4));
 		deckOfCards.push_back(c);
 	}
 }
@@ -260,8 +315,7 @@ Card* Deck::draw()
 	if(deckOfCards.size() > 0)
 	{
 		// shuffle the deck
-		unsigned seed = chrono::system_clock::now().time_since_epoch().count();
-		shuffle(deckOfCards.begin(), deckOfCards.end(), default_random_engine(seed));
+		shuffle(deckOfCards.begin(), deckOfCards.end(), mt19937(random_device()()));
 		// since the deck is already randomized, we draw from the top.
 		Card* c = deckOfCards.at(0);
 		// delete this first card from the deck

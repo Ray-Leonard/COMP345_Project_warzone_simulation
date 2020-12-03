@@ -1,3 +1,7 @@
+//
+// Created by Nian Liu on 2020-10-02.
+//
+
 #include "Map.h"
 #include <iostream>
 #include <iomanip>
@@ -26,7 +30,7 @@ Territory::Territory(string tName, int tID, int cID, string cName)
     pID = 0;
     armyNum = 0;
 }
-Territory::Territory(const Territory& obj) {
+Territory::Territory(const Territory& obj){
     tName = obj.tName;
     tID = obj.tID;
     cID = obj.cID;
@@ -44,7 +48,7 @@ Territory::~Territory() {
 string Territory::gettName() { return tName; }
 int Territory::gettId() { return tID; }
 int Territory::getcId() { return cID; }
-int Territory::getpId() { return pID; }
+int Territory::getpId() {return pID;}
 int Territory::getArmyNum() { return armyNum; }
 vector<int> Territory::getAdjacentTerritoryVec() { return adjacentTerritoryVec; }
 
@@ -53,7 +57,7 @@ void Territory::settId(int tId) { tID = tId; }
 void Territory::setcId(int cId) { cID = cId; }
 void Territory::setpId(int pId) { pID = pId; }
 void Territory::setArmy(int newarmyNum) { armyNum = newarmyNum; }
-void Territory::addArmy(int n) { armyNum += n; }
+void Territory::addArmy(int n) { armyNum = armyNum + n; }
 void Territory::removeArmy(int n) { armyNum -= n; }
 void Territory::addAdjacentTerritory(int adjT) {
     adjacentTerritoryVec.push_back(adjT);
@@ -93,7 +97,7 @@ void Territory::printAllAdjWithinSameConti() {
 ostream& operator <<(ostream& output, Territory& obj) {
     output.width(12);
     output << obj.tName;
-    output << "\t" << obj.tID << "\t" << obj.pID << "\t" << obj.armyNum << "\t" << obj.cName << endl;
+    output << "\t TerrID:" << obj.tID << "\tPlayerID: " << obj.pID << "\tArmy: " << obj.armyNum << "\t\t" << obj.cName <<endl;
     return output;
 }
 
@@ -110,7 +114,7 @@ Continent::Continent(int cId, string cName, int bonusArmyNum)
     continentName = cName;
     this->bonusArmyNum = bonusArmyNum;
 }
-Continent::Continent(const Continent& obj) {
+Continent::Continent(const Continent& obj){
     continentName = obj.continentName;
     cId = obj.cId;
     bonusArmyNum = obj.bonusArmyNum;
@@ -121,14 +125,14 @@ Continent::~Continent() {
     allTerritories.clear();
 }
 vector<int>& Continent::getAllTerritories() { return allTerritories; }
-string Continent::getContinentName() { return continentName; }
+string Continent::getContinentName() {return continentName;}
 int Continent::getcId() { return cId; }
 int Continent::getBounusArmyNum() { return bonusArmyNum; }
 int Continent::getNumOfTerritories() { return allTerritories.size(); }
 void Continent::setContinentName(string cName) { continentName = cName; }
 void Continent::setcId(int cId) { this->cId = cId; }
 void Continent::setBounusArmyNum(int bonusArmyNum) { this->bonusArmyNum = bonusArmyNum; }
-void Continent::addTerritory(int t) { allTerritories.push_back(t); }
+void Continent::addTerritory(int t) { allTerritories.push_back(t);}
 
 bool Continent::validateSubgraph() {
     //iterate allTerritories
@@ -198,7 +202,7 @@ Map::Map(int terri_num, int conti_num) {
     numOfTrritories = terri_num;
     numOfContinents = conti_num;
 }
-Map::Map(const Map& obj) {
+Map::Map(const Map& obj){
     numOfTrritories = obj.numOfTrritories;
     numOfContinents = obj.numOfContinents;
 }
@@ -224,16 +228,12 @@ Map::~Map() {
     }
     allContinents.clear();
 }
-
-string Map::allMlMapNames[4] = { "europe.map", "brasil.map", "greece.map", "spain.map" };
-string Map::allCmMapNames[4] = { "Europe.map", "Earth.map", "Africa.map", "Canada.map" };
-
 int Map::getNumOfTrritories() { return numOfTrritories; }
 int Map::getNumOfContinents() { return numOfContinents; }
 void Map::setNumOfContinents(int conti_num) { numOfContinents = conti_num; }
 void Map::setNumOfTrritories(int terri_num) { numOfTrritories = terri_num; }
-void Map::addContinent(Continent* c) { allContinents.push_back(c); }
-void Map::addNode(Territory* tt) { allNodes.push_back(tt); }
+void Map::addContinent(Continent *c) {allContinents.push_back(c);}
+void Map::addNode(Territory *tt) {allNodes.push_back(tt);}
 
 Continent* Map::getContinentById(int cId) {
     //cout << "Get continent with id " << cId << ": " << *(allContinents[cId - 1]) << endl; //test
@@ -249,12 +249,12 @@ Territory* Map::getTerritoryById(int tID) {
 void Map::printNodes()
 {
     cout.width(12);
-    cout << "Territory" << ":";
-    cout << "\t" << "Id" << "\t" << "Player" << "\t" << "# of Army" << "\t" << "Continent" << endl;
+    cout << "Territory" <<":";
+    cout<<"\t" << "Id" << "\t" << "Player" << "\t" << "# of Army" << "\t" << "Continent" << endl;
     int size = allNodes.size();
-    for (int i = 0; i < size; i++)
+    for(int i=0;i<size;i++)
     {
-        cout << *(allNodes[i]) << endl;
+        cout<<*(allNodes[i])<<endl;
     }
 }
 
@@ -301,13 +301,13 @@ bool Map::isConnected(int nodes_num) {
 
         for (int j = 0; j < nodes_num; j++) {
             if (!visited[j]) {
-                delete visited;
-                visited = nullptr;
+            	delete visited;
+            	visited = nullptr;
                 return false;
             }
         }
         delete visited;
-        visited = nullptr;
+    	visited = nullptr;
     }
     return true;
 }
@@ -335,22 +335,6 @@ bool Map::validate() {
     }
     cout << "This is a valid map!" << endl;
     return true;
-}
-
-void Map::printAllMapNames() {
-    int arrSize = sizeof(allMlMapNames) / sizeof(allMlMapNames[0]);
-    int cmArrSize = sizeof(allCmMapNames) / sizeof(allCmMapNames[0]);
-    cout << "\nPlease select one from the following map: " << endl;
-    cout << "Initial maps: " << endl;
-    for (int i = 0; i < arrSize; i++) {
-        cout << "#" << i + 1 << " " << allMlMapNames[i] << endl;
-    }
-    cout << endl;
-    cout << "Conquest maps: " << endl;
-    for (int i = 0; i < cmArrSize; i++) {
-        cout << "#" << i + 1 << " " << allCmMapNames[i] << endl;
-    }
-    cout << endl;
 }
 
 Map& Map::operator=(const Map& map_obj) {

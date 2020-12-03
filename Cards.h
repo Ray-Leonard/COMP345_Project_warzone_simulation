@@ -7,10 +7,14 @@
 #include <algorithm>
 #include <random>
 #include <chrono>
+#include "Orders.h"
+#include "Map.h"
+
+class Player;
 
 using namespace std;
 
-enum class CardTypes {bomb, reinforcement, blockade, airlift, diplomacy};
+enum class CardTypes {bomb, blockade, airlift, diplomacy};
 
 /* The Card class represents a single card
    Both Deck and Hand should have a collection of Card.
@@ -30,9 +34,9 @@ public:
 	// copy constructor
 	Card(const Card& src);
 	/* play method that is called to play the card, which creates
-	   an order and adds it to the player's list of orders and then returns this card to the deck. (now managed in CardsDriver)
+	   an order and adds it to the player's list of orders and then returns this card to the deck.
 	   For now the return type is string, but should be Order. */
-	string play();
+	Order* play(Player* player, vector<Territory*>& toAtk, vector<Territory*>& toDef, vector<Player*>& playerList);
 	// getter to get the type of the card
 	CardTypes getType() const;
 	// convert the type to string
@@ -70,7 +74,10 @@ public:
 	bool add(Card* card);
 	bool remove(Card* card);
 	// getter
+	int getRamainingNum();
+	Card* getCard(int index);
 	int getCapacity() const;
+	int getNumOfCards() const { return handOfCards.size(); }
 	vector<Card*> getHandOfCards() const;
 
 	// operator overloading
@@ -102,7 +109,7 @@ public:
 	void initialize();
 	// draw method that allows a player to draw a card at random
 	// from the cards remaining in the deck and place in their hand
-	// Return a bool indicating if the draw was success or fail(when no more cards to be drawn)
+	// Return the card drawn. If no more cards left in the deck, return nullptr
 	// Take in a Hand as parameter to indicate which hand to add card to
 	Card* draw();
 	// accepting an card being put back to the deck

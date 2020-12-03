@@ -1,10 +1,4 @@
-//
-// Created by Nian Liu on 2020-10-02.
-//
-
-#ifndef untitled_MAP_H
-#define untitled_MAP_H
-
+#pragma once
 #include <string>
 #include <list>
 #include <array>
@@ -12,15 +6,18 @@
 #include <vector>
 using namespace std;
 
+class Player;
+
 class Territory
 {
+public:
     string tName; //territory name
     int tID; //territory id
     int cID; //continent id this territory belongs to
     string cName; //continent name this territory belongs to
     int pID; //player id
     int armyNum; //num of army 
-public:
+
     vector<int> adjacentTerritoryVec; //adjacent territories vector for current territory
     /*
     subgraph, contains relationship between territories in the current continent
@@ -34,7 +31,7 @@ public:
     //parameterized constructor
     Territory(string tName, int tID, int cID, string cName);
     //copy constructor
-    Territory(const Territory &obj);
+    Territory(const Territory& obj);
     //destructor
     ~Territory();
 
@@ -50,7 +47,9 @@ public:
     void settId(int tId);
     void setcId(int cId);
     void setpId(int pId);
-    void setArmyNum(int armyNum);
+    void setArmy(int newarmyNum);
+    void addArmy(int n);
+    void removeArmy(int n);
     void addAdjacentTerritory(int t);
     void printAdjacentTerritoryVec();
     void printAllAdjWithinSameConti();
@@ -60,6 +59,7 @@ public:
 
 class Continent
 {
+public:
     string continentName;
     int cId; //continent id
     int bonusArmyNum; //# of army a player will get if he/she occupies all countries in current continent
@@ -71,13 +71,12 @@ class Continent
     */
     vector<int> allTerritories;
 
-
-public:
     Continent();
     Continent(int cId, string cName, int bonusArmyNum);
-    Continent(const Continent &obj);
+    Continent(const Continent& obj);
     ~Continent();
 
+    vector<int>& getAllTerritories();
     string getContinentName();
     int getcId();
     int getBounusArmyNum();
@@ -97,6 +96,8 @@ public:
 class Map
 {
 public:
+    static string allMlMapNames[4]; //all maps in MapLoader class
+    static string allCmMapNames[4]; //all maps in ConquestFileReader class
     static vector<Territory*> allNodes;
     static vector<Continent*> allContinents;
     int numOfTrritories;
@@ -106,6 +107,7 @@ public:
     Map(int terri_num, int conti_num);
     Map(const Map& obj);
     ~Map();
+    static void printAllMapNames();
     int getNumOfTrritories();
     int getNumOfContinents();
     void setNumOfContinents(int conti_num);
@@ -115,7 +117,7 @@ public:
     static Continent* getContinentById(int cId);
     static Territory* getTerritoryById(int tID);
 
-    void printNodes();
+    void printNodes(); //print graph
     bool* mapDFS(int start_node, const int nodes_num); //pass the start node
     //node: the start node, visited: an array to mark if a node is visited or not, vec: adjacency vector
     void mapTraverseFunc(int start_node, bool visited[]);
@@ -123,11 +125,10 @@ public:
 
     //check if the map is connected graph
     bool validate();
-    void printGraph();
+
+    //assignment operator
+    Map& operator=(const Map& map_obj);
 
     //output a table
     friend ostream& operator <<(ostream& output, Map& map_obj);
 };
-
-
-#endif //DEMO11_MAP_H

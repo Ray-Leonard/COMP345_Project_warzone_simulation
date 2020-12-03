@@ -1,7 +1,3 @@
-//
-// Created by Nian Liu on 2020-10-19.
-//
-
 #include "MapLoader.h"
 using namespace std;
 
@@ -61,26 +57,10 @@ Map* MapLoader::loadingMap() {
     if (filePath.find(".map") == string::npos && filePath.find(".txt") == string::npos) {
         cout << "Wrong file extension!" << endl;
         cout << "Please input a correct map file name!" << endl;
-        throw -1;
+        throw - 1;
     }
 
-    /*
-    variables for creating Continent, Trritory object
-    cNo: continent id
-    cName: continent name
-    bonusArmyNum: bonus army number if a play occupies all the territories/countries in current continent
-    tName: territory/country name
-    tNo: territory/country id
-    t_cNo: continent id that a country/territory belongs to
-    t_cName: continent name that a country/territory belongs to
-    str: the variable for reading a single string
-    c_ptr: continent obj pointer, used to add its territories
-    line: string variable for read line by line
-    hasContinents: check if the map file contains Continents section
-    hasCountries: check if the map file contains Countries/Territories section
-    hasBorders: check if the map file contains Borders section
-    */
-    int cNo = 0, tNo=0, t_cNo=0, bonusArmyNum;
+    int cNo = 0, tNo = 0, t_cNo = 0, bonusArmyNum;
     string str, cName, tName, t_cName;
     bool hasContinents = false, hasCountries = false, hasBorders = false;
     Continent* c_ptr;
@@ -108,7 +88,7 @@ Map* MapLoader::loadingMap() {
                     if (str == "[borders]") {
                         cout << "Invalid file content, missing Countries section!" << endl;
                         cout << "Please input a correct map file" << endl;
-                        throw -1;
+                        throw - 1;
                     }
                     cName = str;
                     input >> str; //read bonusArmyNum
@@ -124,7 +104,7 @@ Map* MapLoader::loadingMap() {
                 if (!hasContinents) {
                     cout << "Invalid file content, missing Continents section!" << endl;
                     cout << "Please input a correct map file" << endl;
-                    throw -1;
+                    throw - 1;
                 }
                 hasCountries = true;
                 while (str != "[borders]") {
@@ -163,22 +143,22 @@ Map* MapLoader::loadingMap() {
                         clineDataSize = clineData.size(); //last two data is coordinate, ignore
                         for (int i = 0; i < clineDataSize - 2; i++) {
                             switch (i) {
-                                case 0:
-                                    tNo = stoi(clineData[0]); //store territory number
-                                    break;
-                                case 1:
-                                    tName = clineData[1]; //store territory name
-                                    break;
-                                case 2:
-                                    t_cNo = stoi(clineData[2]);
-                                    break;
-                                case 3: //check if one territory belongs to two continents
-                                    cout << "One territory cannot belong to two continents." << endl;
-                                    cout << "Please input a correct map file" << endl;
-                                    throw -1;
-                                default:
-                                    cout << "Please input a correct map file" << endl;
-                                    throw -1;
+                            case 0:
+                                tNo = stoi(clineData[0]); //store territory number
+                                break;
+                            case 1:
+                                tName = clineData[1]; //store territory name
+                                break;
+                            case 2:
+                                t_cNo = stoi(clineData[2]);
+                                break;
+                            case 3: //check if one territory belongs to two continents
+                                cout << "One territory cannot belong to two continents." << endl;
+                                cout << "Please input a correct map file" << endl;
+                                throw - 1;
+                            default:
+                                cout << "Please input a correct map file" << endl;
+                                throw - 1;
                             }
                         }
                         c_ptr = map_ptr->getContinentById(t_cNo); //get continent according to t_cNo
@@ -198,7 +178,7 @@ Map* MapLoader::loadingMap() {
                 if (!hasContinents || !hasCountries) {
                     cout << "Invalid file content, missing necessary section!" << endl;
                     cout << "Please input a correct map file" << endl;
-                    throw -1;
+                    throw - 1;
                 }
 
                 hasBorders = true;
@@ -209,8 +189,6 @@ Map* MapLoader::loadingMap() {
                 Territory* mTT = new Territory(); //store the Territory pointer returned by getTerritoryById()
                 Territory* adjTT = new Territory(); //store the adjacent Territory pointer
 
-                //cout << "getNumOfTrritories: " << map_ptr->getNumOfTrritories() << endl;
-                //map_ptr->printNodes(); //for test
                 //while don't reach the end of file
                 while (getline(input, line)) {
                     //cout << "line: " << line << endl;
@@ -228,36 +206,253 @@ Map* MapLoader::loadingMap() {
 
                         if (count == 1) {
                             mTT = map_ptr->getTerritoryById(tId);
-                            //cout << "Trritory id: " << mTT->gettId() << endl;
+                            
                         }
                         else {
-                            //adjTT = map_ptr->getTerritoryById(tId);
+                            
                             mTT->addAdjacentTerritory(tId); //add adjTT pinter to adjacentTerritoryVec vector of mTT
                         }
                     }
-                    //for test
-                    //cout << "print its adjacent territories: " << endl;
-                    //mTT->printAdjacentTerritoryVec(); //for test
 
                     count = 0; //reset count to 0
                     line = "";
                 }
             }
         }
-        //cout << "hasBorders: " << hasBorders << endl; //test
-        //cout << "hasContinents: " << hasContinents << endl; //test
-        //cout << "hasCountries: " << hasCountries << endl; //test
-        //if map file doesn't contain continents, countries, or borders section, show invalid file
+
         if (!hasBorders || !hasContinents || !hasCountries) {
             cout << "Invalid file content, missing necessary sections." << endl;
             cout << "Please input a correct map file" << endl;
-            throw -1;
+            throw - 1;
         }
     }
     else { //fail to load map file
         cout << "Fail to load map file!" << endl;
         cout << "Please input a correct map file" << endl;
-        throw -1;
+        throw - 1;
     }
     return map_ptr;
+}
+
+
+
+//adaptee
+ConquestFileReader::ConquestFileReader() {
+    fileName = "no file path";
+    map_ptr = new Map();
+}
+
+ConquestFileReader::ConquestFileReader(string file_path) {
+    fileName = file_path;
+    map_ptr = new Map();
+}
+
+ConquestFileReader::ConquestFileReader(const ConquestFileReader& conMap) {
+    fileName = conMap.fileName;
+    this->map_ptr = new Map(*(conMap.map_ptr));
+}
+
+ConquestFileReader::~ConquestFileReader() {
+    delete map_ptr;
+}
+
+istream& operator>>(istream& input, ConquestFileReader& conMap_obj) {
+    input >> conMap_obj.fileName; //store the input value into the filePath_ptr variable
+    return input;
+}
+
+ostream& operator<<(ostream& output, ConquestFileReader& conMap_obj) {
+    output << "The file name is " << conMap_obj.fileName << ". ";
+    return output;
+}
+
+ConquestFileReader& ConquestFileReader::operator=(const ConquestFileReader& conMap_obj) {
+    if (this != &conMap_obj) {
+        delete map_ptr;
+        fileName = conMap_obj.fileName;
+        *map_ptr = *(conMap_obj.map_ptr); //call assignment operator in Map class
+    }
+    return *this;
+}
+
+
+Map* ConquestFileReader::loadConquestMap() {
+    if (fileName.find(".map") == string::npos && fileName.find(".txt") == string::npos) {
+        cout << "Wrong file extension!" << endl;
+        cout << "Please input a correct map file name!" << endl;
+        throw - 1;
+    }
+
+    int cNo = 0, tNo = 0, t_cNo = 0, bonusArmyNum = 0;
+    string str, cName, tName, t_cName;
+    bool hasContinents = false, hasCountries = false;
+    Continent* c_ptr;
+    string line, cline;
+
+    map<string, int> continets; // cName -> cID
+    map<string, int> territories; // tName -> tID
+    map<string, string> adjTerriStr; // tName -> adjacent territories name
+
+    ifstream input(".\\conquestMap\\" + fileName);
+    if (!input.fail()) { //succeed to read map file
+        while (!input.eof()) {
+            input >> str;
+            //cout << "str now is: " << str << endl;
+
+            //if the file reaches the continents part
+            if (str == "[Continents]") {
+                hasContinents = true;
+                string delimiter = "=";
+
+                while (str != "[Territories]") {
+                    //read one line
+                    getline(input, line);
+
+                    if (input.eof()) {
+                        cout << "End of file." << endl;
+                        break;
+                    }
+                    if (line == "[Territories]") {
+                        
+                        str = line;
+                        
+                        break;
+                    }
+                    if (line.empty()) {
+                        continue;
+                    }
+
+                    size_t delimiterPos = line.find(delimiter);
+                    if (delimiterPos != string::npos) {
+                        cName = line.substr(0, delimiterPos); //read continent name
+                        line.erase(0, delimiterPos + 1);
+                        bonusArmyNum = stoi(line); //convert to int
+                    }
+                    Continent* c = new Continent(++cNo, cName, bonusArmyNum); //create a new continent obj
+                    continets.insert({ cName, cNo });
+                    cout << *c;
+                    map_ptr->addContinent(c); //add continent to vector<Continent*> allContinents in Map obj
+                    map_ptr->setNumOfContinents(map_ptr->getNumOfContinents() + 1); //increase the continent num in Map obj
+                }
+            }
+
+            if (str == "[Territories]") {
+                if (!hasContinents) {
+                    cout << "Invalid file content, missing Continents section!" << endl;
+                    cout << "Please input a correct map file" << endl;
+                    throw - 1;
+                }
+
+                hasCountries = true;
+                string delimiter = ",";
+
+                while (!input.eof()) {
+
+                    while (getline(input, cline)) {
+                        if (cline.empty()) {
+                            continue;
+                        }
+                        //cout << "cline: " << cline << endl;
+
+                        string belongsToContinent = "";
+                        size_t delimiterPos = 0;
+                        int countStr = 0; //0: tName, 1: num, 2: num, 3: cName, 4: adjConti
+
+                        while (((delimiterPos = cline.find(delimiter)) != std::string::npos) && countStr < 5) {
+                            switch (countStr) {
+                            case 0:
+                                tName = cline.substr(0, delimiterPos);
+                                territories.insert({ tName, ++tNo });
+                                cline.erase(0, delimiterPos + 1);
+                                break;
+                            case 1:
+                            case 2:
+                                cline.erase(0, delimiterPos + 1);
+                                break;
+                            case 3:
+                                belongsToContinent = cline.substr(0, delimiterPos);
+                                t_cNo = continets.at(belongsToContinent);
+                                cline.erase(0, delimiterPos + 1);
+                                break;
+                            case 4:
+                                adjTerriStr.insert({ tName, cline });
+                                break;
+                            default:
+                                break;
+                            }
+                            countStr++;
+                        }
+
+                        c_ptr = map_ptr->getContinentById(t_cNo); //get continent according to t_cNo
+                        c_ptr->addTerritory(tNo); //add territory to corresponding continent
+
+                        Territory* t = new Territory(tName, tNo, t_cNo, belongsToContinent); //create a new territory obj
+                        //cout << *t;
+
+                        map_ptr->addNode(t); //add territory to vector<Territory*> allNodes in Map obj
+                        map_ptr->setNumOfTrritories(map_ptr->getNumOfTrritories() + 1);//increase the territory num in Map obj
+                        cline = "";
+                    }
+                }
+
+                //add adjacent territory
+                Territory* mTT = nullptr; //store the Territory pointer returned by getTerritoryById()
+                size_t delimiterPos = 0;
+
+                for (auto itr = adjTerriStr.begin(); itr != adjTerriStr.end(); ++itr) {
+                    int mNo = territories.at(itr->first); //get key terri id
+                    mTT = map_ptr->getTerritoryById(mNo);
+                    string adjStr = itr->second; //contains all adj terri
+                    string adjTerriStr = "";
+
+                    //split adjStr into terri#
+                    while ((delimiterPos = adjStr.find(delimiter)) != std::string::npos) {
+                        adjTerriStr = adjStr.substr(0, delimiterPos);
+                        int adjNo = territories.at(adjTerriStr); //get adjTerri id
+                        mTT->addAdjacentTerritory(adjNo); //add adjTT pinter to adjacentTerritoryVec vector of mTT
+                        adjStr.erase(0, delimiterPos + 1);
+                    }
+                    //add last adj terri to vector
+                    adjTerriStr = adjStr;
+                    int adjNo = territories.at(adjTerriStr);
+                    mTT->addAdjacentTerritory(adjNo);
+
+
+                }
+
+            }
+        }
+
+
+        //if map file doesn't contain continents, countries, or borders section, show invalid file
+        if (!hasContinents || !hasCountries) {
+            cout << "Invalid file content, missing necessary sections." << endl;
+            cout << "Please input a correct map file" << endl;
+            throw - 1;
+        }
+    }
+    else { //fail to load map file
+        cout << "Fail to load map file!" << endl;
+        cout << "Please input a correct map file" << endl;
+        throw - 1;
+    }
+    return map_ptr;
+}
+
+
+
+
+
+ConquestFileReaderAdapter::ConquestFileReaderAdapter() : MapLoader(), cfr(nullptr) {}
+
+ConquestFileReaderAdapter::ConquestFileReaderAdapter(ConquestFileReader* cfr_ptr) : MapLoader(), cfr(cfr_ptr) {}
+
+ConquestFileReaderAdapter::~ConquestFileReaderAdapter() {
+    delete cfr;
+    cfr = nullptr;
+}
+
+Map* ConquestFileReaderAdapter::loadingMap() {
+    cout << "Read conquest map." << endl;
+    return cfr->loadConquestMap();
 }
